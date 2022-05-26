@@ -45,18 +45,24 @@ def search_name(request):
 class StudentHomeView(View):
     def get(self, request, *args, **kwargs):
         student = None
+        context = {}
         id = self.request.GET.get('student-id', None)
         name = self.request.GET.get('student-name', None)
         if id:
             student = Student.objects.filter(id=id).select_related('school').prefetch_related(
                 'bookshistorywithstudent_set').first()
-
+            context['student'] = student
+            context['student_id'] = id
         elif name:
             breakpoint()
             student = Student.objects.filter(first_name=name.split(' ')[0],
                      last_name=name.split(' ')[1]).prefetch_related('school', 'bookshistorywithstudent_set').first()
+
+            context['student'] = student
+            context['student_name'] = name
+
         print(id, name)
-        return render(self.request, template_name='Home.html', context={'student': student, 'student_id': id, "student_name": name})
+        return render(self.request, template_name='Home.html', context=context)
 
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
