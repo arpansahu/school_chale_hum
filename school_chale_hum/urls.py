@@ -24,10 +24,8 @@ from school.views import(
 
 urlpatterns = [
     # Admin URL
-    path('admin/', admin.site.urls),
-
     path('', RedirectView.as_view(url='student/', permanent=True)),
-
+    path('student/admin/', admin.site.urls),
     path('student/add/', StudentCreateView.as_view(), name='student-create'),
     path('student/', StudentHomeView.as_view(), name='home'),
     path('student/<pk>/', StudentView.as_view(), name='student'),
