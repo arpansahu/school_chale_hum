@@ -208,7 +208,7 @@ CACHES = {
 
 To run this project, you will need to add the following environment variables to your .env file
 
-REDISCLOUD_URL=
+REDIS_URL=
 
 SECRET_KEY=
 
