@@ -180,17 +180,17 @@
           }
         })
     $('#student-id').on('click', function () {
-       $('#student-name').val('');
-       $('form').submit( function() {
-             $(this).unbind('submit').submit()
-        })
+        $('#student-name').val('');
+        $("form").submit(function(e){
+            $(this).unbind('submit').submit();
+        });
     })
 
     $('#student-name').on('click', function () {
         $('#student-id').val('');
-        $('form').submit( function() {
-             $(this).unbind('submit').submit()
-        })
+        $("form").submit(function(e){
+            $(this).unbind('submit').submit();
+        });
     })
 
 
@@ -199,8 +199,9 @@
         var id = $('#student-id').val();
 
         if (!id && !name) {
-            $("form").submit(function(){
-                $(this).preventDefault();
+            console.log(typeof id, typeof id);
+            $("form").submit(function(e){
+                e.preventDefault();
             });
             Swal.fire({
                 title: 'Oops...',
