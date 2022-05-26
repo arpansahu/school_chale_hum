@@ -19,7 +19,6 @@ def random_with_N_digits(n):
 def startup():
     df = pd.read_excel(io='dummy_data.xls')
     for index, row in df.iterrows():
-        # breakpoint()
         row_first_name = row['first_name']
         row_last_name = row['last_name']
         row_email = row['email']

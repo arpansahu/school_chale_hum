@@ -167,7 +167,6 @@ class PasswordResetForm(forms.Form):
         subject = loader.render_to_string(subject_template_name, context)
         # Email subject *must not* contain newlines
         subject = "".join(subject.splitlines())
-        breakpoint()
         body = loader.render_to_string(email_template_name, context)
 
         if html_email_template_name is not None:

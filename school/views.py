@@ -40,7 +40,6 @@ def search_name(request):
     return JsonResponse({'status': 200, 'data': payload})
 
 
-
 @method_decorator(login_required(redirect_field_name=''), name='dispatch')
 class StudentHomeView(View):
     def get(self, request, *args, **kwargs):
@@ -54,9 +53,9 @@ class StudentHomeView(View):
             context['student'] = student
             context['student_id'] = id
         elif name:
-            breakpoint()
             student = Student.objects.filter(first_name=name.split(' ')[0],
-                     last_name=name.split(' ')[1]).prefetch_related('school', 'bookshistorywithstudent_set').first()
+                                             last_name=name.split(' ')[1]).prefetch_related('school',
+                                                                                            'bookshistorywithstudent_set').first()
 
             context['student'] = student
             context['student_name'] = name

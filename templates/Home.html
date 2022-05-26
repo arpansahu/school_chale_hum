@@ -176,6 +176,12 @@
               })
           }
         })
+    $('#student-id').on('click', function () {
+        $('#student-name').val('');
+    })
 
+    $('#student-name').on('click', function () {
+        $('#student-id').val('');
+    })
     </script>
 {% endblock javascripts %}
