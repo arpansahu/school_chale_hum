@@ -24,10 +24,10 @@
 
 ## Demo
 
-Available at: https://clock-works.herokuapp.com/
+Available at: https://school-chale-hum.herokuapp.com/
 
 admin login details:--
-username: arpansahu
+username: admin@arpansahu.me
 password: showmecode
 ## License
 
