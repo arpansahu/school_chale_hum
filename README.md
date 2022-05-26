@@ -144,7 +144,16 @@ Create Procfile and include this code snippet in it.
 release: ./release-tasks.sh
 web: gunicorn school_chale_hum.wsgi
 ```
-
+Create a release-tasks.sh and include this code snippet in it.
+```
+python manage.py makemigrations
+python manage.py migrate
+python manage.py update_data                 (optional is you update this csv frequently)
+```
+Don't forget to make release-tasks.sh file executable using following command
+```
+chmod +x release-tasks.sh
+```
 Comment down Database setting and install 
 
 ``` 
