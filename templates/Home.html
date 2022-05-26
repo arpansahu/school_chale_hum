@@ -30,7 +30,7 @@
 
 <div class="container-fluid py-4">
     <div class="row" style="margin-bottom: 10px">
-        <form method="GET" action="{% url 'home' %}">
+        <form method="GET" action="{% url 'home' %}" id="form-home">
             <div class="col-md-12 mb-lg-0 mb-4">
                 <div class="card mt-4">
               <div class="card-header pb-0 p-3">
@@ -47,7 +47,7 @@
                       <div class="col-6 d-flex align-items-center" style="margin: 5px">
                         <h6 class="mb-0">Enter ID</h6>
                       </div>
-                      <input class="autocomplete-input" name="student-id" id="student-id" value="{{ student_id }}" placeholder="Search Student ID..."/>
+                      <input type="number" class="autocomplete-input" name="student-id" id="student-id" value="{{ student_id }}" placeholder="Search Student ID..."/>
                       <ul class="autocomplete-result-list"></ul>
                     </div>
                   </div>
@@ -63,7 +63,7 @@
                 </div>
               </div>
               <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                <input type="submit" value="Search" class="btn bg-gradient-success w-auto " >
+                <input type="submit" value="Search" id="submit-search" class="btn bg-gradient-success w-auto " >
               </div>
             </div>
             </div>
@@ -177,11 +177,34 @@
           }
         })
     $('#student-id').on('click', function () {
-        $('#student-name').val('');
+       $('#student-name').val('');
+       $('form').submit( function() {
+             $(this).unbind('submit').submit()
+        })
     })
 
     $('#student-name').on('click', function () {
         $('#student-id').val('');
+        $('form').submit( function() {
+             $(this).unbind('submit').submit()
+        })
+    })
+
+
+    $('#submit-search').on('click', function (e) {
+        var name = $('#student-name').val();
+        var id = $('#student-id').val();
+
+        if (!id && !name) {
+            $("form").submit(function(){
+                $(this).preventDefault();
+            });
+            Swal.fire({
+                title: 'Oops...',
+                text: "Id and Name Field both cannot be Empty",
+                icon: 'error',
+            });
+        }
     })
     </script>
 {% endblock javascripts %}
