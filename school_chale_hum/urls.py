@@ -5,10 +5,11 @@ from django.views.generic import RedirectView
 
 from account.views import (
     CustomPasswordResetView,
-    registration_view,
     LogoutView,
     LoginView,
     AccountView,
+    RegistrationView,
+    activate,
 )
 from school.views import(
     StudentHomeView,
@@ -39,12 +40,12 @@ urlpatterns = [
     path('search-student-id/', search_id, name='search-company-id'),
     path('search-student-name/', search_name, name='search-student-name'),
 
-
-    path('register/', registration_view, name='register'),
+    path('register/', RegistrationView.as_view(), name='register'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', LoginView.as_view(), name='login'),
     path('account/', AccountView.as_view(), name='account'),
-
+    path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/',
+         activate, name='account_activate'),
     path('password_change/done/',
          auth_views.PasswordChangeDoneView.as_view(template_name='registration/password_change_done.html'),
          name='password_change_done'),
