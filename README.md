@@ -5,8 +5,9 @@
 2. Used REDIS-CLOUD Sever, provided by heroku add-ons
 3. Used AWS S3 bucket for static files
 4. Used Mail JET API in place of SMTP and used custom reset View to override default send_mail method
-5. Deployed on Heroku
-6. Complete Custom Auth is Implemented
+5. In built views of PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetCompleteView, Build Custom Templates for These Inbuilt Views
+6. Deployed on Heroku
+7. Complete Custom Auth is Implemented
 
 ## Tech Stack
 
