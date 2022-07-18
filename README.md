@@ -3,13 +3,14 @@
 
 1. Django app for managing students, their respective schools and books
 2. Every student's progress with a particular book can be seen on the app
-3. Used Heroku Postgres
-4. Used REDIS-CLOUD Sever, provided by heroku add-ons
-5. Used AWS S3 bucket for static files
-6. Used Mail JET API in place of SMTP and used custom reset View to override default send_mail method
-7. In built views of PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetCompleteView, Build Custom Templates for These Inbuilt Views
-8. Deployed on Heroku
-9. Complete Custom Auth is Implemented
+3. Built Django Command for extracting data from csv and storing it into database
+4. Used Heroku Postgres
+5. Used REDIS-CLOUD Sever, provided by heroku add-ons
+6. Used AWS S3 bucket for static files
+7. Used Mail JET API in place of SMTP and used custom reset View to override default send_mail method
+8. In built views of PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetCompleteView, Build Custom Templates for These Inbuilt Views
+9. Deployed on Heroku
+10. Complete Custom Auth is Implemented
 
 ## Tech Stack
 
@@ -44,7 +45,7 @@ Installing Pre requisites
   pip install -r requirements.txt
 ```
 
-Create .env File
+Create .env File and don't forget to add .env to gitignore
 ```bash
   add variables mentioned in .env.example
 ```
@@ -252,5 +253,9 @@ AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 
 AWS_STORAGE_BUCKET_NAME=
+
+DOMAIN=
+
+PROTOCOL=
 
 
