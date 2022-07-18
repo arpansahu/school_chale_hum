@@ -158,7 +158,7 @@ Don't forget to make release-tasks.sh file executable using following command
 ```
 chmod +x release-tasks.sh
 ```
-Comment down Database setting and install 
+Comment down Database setting and install dj-database-url
 
 ``` 
 # DATABASES = {
@@ -187,8 +187,8 @@ Change CACHE from
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        # 'LOCATION': REDISCLOUD_URL,
-        'LOCATION':'redis://localhost:6379'
+        'LOCATION': REDIS_URL,
+        #'LOCATION':'redis://localhost:6379'
     }
 }
 ```
@@ -197,7 +197,7 @@ to
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': REDISCLOUD_URL,
+        'LOCATION': REDIS_URL,
         #'LOCATION':'redis://localhost:6379'
     }
 }
