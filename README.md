@@ -1,13 +1,15 @@
 
 # School Chale Hum 
 
-1. Used Heroku Postgres
-2. Used REDIS-CLOUD Sever, provided by heroku add-ons
-3. Used AWS S3 bucket for static files
-4. Used Mail JET API in place of SMTP and used custom reset View to override default send_mail method
-5. In built views of PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetCompleteView, Build Custom Templates for These Inbuilt Views
-6. Deployed on Heroku
-7. Complete Custom Auth is Implemented
+1. Django app for managing students, their respective schools and books
+2. Every student's progress with a particular book can be seen on the app
+3. Used Heroku Postgres
+4. Used REDIS-CLOUD Sever, provided by heroku add-ons
+5. Used AWS S3 bucket for static files
+6. Used Mail JET API in place of SMTP and used custom reset View to override default send_mail method
+7. In built views of PasswordChangeDoneView, PasswordChangeView, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetCompleteView, Build Custom Templates for These Inbuilt Views
+8. Deployed on Heroku
+9. Complete Custom Auth is Implemented
 
 ## Tech Stack
 
