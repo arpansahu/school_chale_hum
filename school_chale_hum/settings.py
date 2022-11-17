@@ -183,10 +183,9 @@ LOGIN_REDIRECT_URL = "/"
 MAIL_JET_API_KEY = config('MAIL_JET_API_KEY')
 MAIL_JET_API_SECRET = config('MAIL_JET_API_SECRET')
 
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-#         'LOCATION': REDIS_URL,
-#         # 'LOCATION':'redis://localhost:6379'
-#     }
-# }
+CACHES = {
+    "default": {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        "LOCATION": config('REDIS_URL'),
+    }
+}
