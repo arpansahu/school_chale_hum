@@ -185,7 +185,7 @@ MAIL_JET_API_SECRET = config('MAIL_JET_API_SECRET')
 
 CACHES = {
     "default": {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": config('REDIS_URL'),
     }
 }
