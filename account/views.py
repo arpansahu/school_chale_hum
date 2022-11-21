@@ -14,6 +14,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_protect
 from django.views.generic import FormView, RedirectView
 from django.utils.translation import gettext_lazy as _
+from django.template import RequestContext
 
 from account.forms import RegistrationForm, AccountAuthenticationForm, AccountUpdateForm, PasswordResetForm, LoginForm
 from django.conf import settings
@@ -148,7 +149,9 @@ class LoginView(View):
         msg = None
         if request.user.is_authenticated:
             return redirect('home')
-        return render(request, "account/login.html", {"form": form, "msg": msg})
+        # return render(request, "account/login.html", {"form": form, "msg": msg})
+        return render_to_response("account/login.html", {"form": form, "msg": msg}, context_instance=RequestContext(request))
+
 
     def post(self, request):
         form = LoginForm(request.POST or None)
