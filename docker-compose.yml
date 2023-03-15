@@ -11,3 +11,4 @@ services:
       - .:/school_chale_hum
     ports:
       - "8013:8013"
+    restart: unless-stopped
