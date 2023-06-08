@@ -6,7 +6,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 
 from .forms import StudentForm, BookForm, SchoolForm
 from .models import (
@@ -41,7 +41,7 @@ def search_name(request):
 
 
 @method_decorator(login_required(redirect_field_name=''), name='dispatch')
-class StudentHomeView(View):
+class HomeView(View):
     def get(self, request, *args, **kwargs):
         student = None
         context = {}
@@ -77,6 +77,20 @@ class StudentView(DetailView):
 
 @method_decorator(login_required(login_url='login'), name='dispatch')
 class StudentCreateView(CreateView):
+    template_name = 'school/student-create.html'
+    model = Student
+    form_class = StudentForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
+
+    def get_success_url(self):
+        return reverse('student', kwargs={'pk': self.object.id})
+
+
+@method_decorator(login_required(login_url='login'), name='dispatch')
+class StudentUpdateView(UpdateView):
     template_name = 'school/student-create.html'
     model = Student
     form_class = StudentForm
