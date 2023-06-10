@@ -12,6 +12,7 @@ from account.views import (
     activate,
 )
 from school.views import(
+    HomeView,
     StudentView,
     search_id,
     StudentCreateView,
@@ -26,7 +27,7 @@ from school.views import(
 urlpatterns = [
     # Admin URL
     # path('', RedirectView.as_view(url='student/', permanent=True)),
-    path('', StudentView.as_view(), name='home'),
+    path('', HomeView.as_view(), name='home'),
     path('student/admin/', admin.site.urls),
     path('student/add/', StudentCreateView.as_view(), name='student-create'),
     path('student/<pk>/', StudentView.as_view(), name='student'),
