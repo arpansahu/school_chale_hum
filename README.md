@@ -58,10 +58,11 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white)](https://www.jenkins.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)]()
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)]()
 
 ## Demo
 
-Available at: https://school-chale-hum.herokuapp.com/
+Available at: https://school-chale-hum.arpansahu.me
 
 admin login details:--
 username: admin@arpansahu.me
@@ -185,7 +186,7 @@ Create a release-tasks.sh and include this code snippet in it.
 ```
 python manage.py makemigrations
 python manage.py migrate
-python manage.py update_data                 (optional is you update this csv frequently)
+python manage.py update_data                 (optional if you update this csv frequently)
 ```
 Don't forget to make release-tasks.sh file executable using following command
 ```
@@ -220,8 +221,8 @@ Change CACHE from
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': REDIS_URL,
-        #'LOCATION':'redis://localhost:6379'
+        #'LOCATION': REDISCLOUD_URL,
+        'LOCATION':'redis://localhost:6379'
     }
 }
 ```
@@ -230,7 +231,7 @@ to
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': REDIS_URL,
+        'LOCATION': REDISCLOUD_URL,
         #'LOCATION':'redis://localhost:6379'
     }
 }
@@ -244,7 +245,7 @@ Ubuntu 22.0 LTS Server, except for portfolio project at https://www.arpansahu.me
 
 
 Now there is EC2 server running with a nginx server and arpansahu.me portfolio
-Nginx forward https://borcelle-crm.arpansahu.me/ to Home Server 
+Nginx forward https://school-chale-hum.arpansahu.me/ to Home Server 
 
 Multiple Projects are running inside dockers so all projects are dockerized.
 You can refer to all projects on https://www.arpansahu.me/projects
@@ -412,7 +413,7 @@ access_log                  /var/log/nginx/supersecure.access.log;
 error_log                   /var/log/nginx/supersecure.error.log;
 
 server {
-  server_name               borcelle-crm.arpansahu.me;        
+  server_name               school-chale-hum.arpansahu.me;        
   listen                    80;
   location / {
     proxy_pass              http://{ip_of_home_server}:8014;
@@ -478,7 +479,7 @@ Now It's time to enable HTTPS for this server
     ```
     
     It will be asking for domain name then you can enter your base domain 
-    I have generated ssl for borcelle-crm.arpansahu.me
+    I have generated ssl for school-chale-hum.arpansahu.me
     
     Then a few questions will be asked by them answer them all and done your ssl certificate will be geerated
     
@@ -504,7 +505,7 @@ Now It's time to enable HTTPS for this server
     error_log                   /var/log/nginx/supersecure.error.log;
      
     server {
-      server_name               borcelle-crm.arpansahu.me;
+      server_name               school-chale-hum.arpansahu.me;
       listen                    80;
       return                    307 https://$host$request_uri;
     }
@@ -842,7 +843,7 @@ error_log                   /var/log/nginx/supersecure.error.log;
 
 server {
     listen         80;
-    server_name    borcelle-crm.arpansahu.me;
+    server_name    school-chale-hum.arpansahu.me;
     # force https-redirects
     if ($scheme = http) {
         return 301 https://$server_name$request_uri;
@@ -956,12 +957,36 @@ sudo vi /etc/nginx/sites-available/arpansahu
 You can add all the server blocks to the same nginx configuration file
 just make sure you place the server block for base domain at the last
 
+* To copy .env from local server directory while buidling image
+
+add Jenkins ALL=(ALL) NOPASSWD: ALL
+inside /etc/sudoers file
+
+and then put 
+
+stage('Dependencies') {
+            steps {
+                script {
+                    sh "sudo cp /root/env/project_name/.env /var/lib/jenkins/workspace/project_name"
+                }
+            }
+        }
+
+in jenkinsfile
+
 * Now Create a file named Jenkinsfile at the root of Git Repo and add following lines to file
 
 ```
 pipeline {
     agent { label 'local' }
     stages {
+        stage('Dependencies') {
+            steps {
+                script {
+                    sh "sudo cp /root/projectenvs/school_chale_hum/.env /var/lib/jenkins/workspace/school_chale_hum"
+                }
+            }
+        }
         stage('Production') {
             steps {
                 script {
@@ -1034,7 +1059,7 @@ Note: agent {label 'local'} is used to specify which node will execute the jenki
 
 * Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.me
 
-Make sure to use Pipline project and name it whatever you want I have named it as borcelle_crm_declarative_pipeline_project
+Make sure to use Pipline project and name it whatever you want I have named it as school_chale_hum
 
 ![Jenkins Project for borcelle CRM Configuration File](https://github.com/arpansahu/borcelle_crm/blob/master/borcelle_crm_jenkins_config.png?raw=true)
 
@@ -1043,7 +1068,7 @@ from Manage Jenkins on home Page --> Manage Credentials
 
 and add your GitHub credentials from there
 
-* Add a .env file to you project using following command
+* Add a .env file to you project using following command (This step is no more required stage('Dependencies'))
 
     ```
     sudo vi  /var/lib/jenkins/workspace/borcelle_crm_declarative_pipeline_project/.env
@@ -1079,12 +1104,13 @@ Now you are good to go.
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white)](https://www.jenkins.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)]()
+[![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)]()
 
 ## Environment Variables
 
 To run this project, you will need to add the following environment variables to your .env file
 
-REDIS_URL=
+REDISCLOUD_URL=
 
 SECRET_KEY=
 

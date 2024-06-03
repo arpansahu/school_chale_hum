@@ -17,7 +17,7 @@ import dj_database_url
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-REDIS_URL = config('REDIS_URL')
+REDISCLOUD_URL = config('REDISCLOUD_URL')
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
@@ -134,30 +134,68 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 if not DEBUG:
-    AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400'
-    }
-    AWS_LOCATION = 'static'
-    AWS_QUERYSTRING_AUTH = False
-    AWS_HEADERS = {
-        'Access-Control-Allow-Origin': '*',
-    }
-    # s3 static settings
-    AWS_STATIC_LOCATION = 'portfolio/school_chale_hum/static'
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
-    STATICFILES_STORAGE = 'school_chale_hum.storage_backends.StaticStorage'
-    # s3 public media settings
-    AWS_PUBLIC_MEDIA_LOCATION = 'portfolio/school_chale_hum/media'
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
-    DEFAULT_FILE_STORAGE = 'school_chale_hum.storage_backends.PublicMediaStorage'
-    # s3 private media settings
-    PRIVATE_MEDIA_LOCATION = 'portfolio/school_chale_hum/private'
-    PRIVATE_FILE_STORAGE = 'school_chale_hum.storage_backends.PrivateMediaStorage'
+    BUCKET_TYPE = config('BUCKET_TYPE')
+
+    if BUCKET_TYPE == 'AWS':
+
+        AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+        AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+        AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+        AWS_DEFAULT_ACL = 'public-read'
+        AWS_S3_OBJECT_PARAMETERS = {
+            'CacheControl': 'max-age=86400'
+        }
+        AWS_LOCATION = 'static'
+        AWS_QUERYSTRING_AUTH = False
+        AWS_HEADERS = {
+            'Access-Control-Allow-Origin': '*',
+        }
+        # s3 static settings
+        AWS_STATIC_LOCATION = 'portfolio/school_chale_hum/static'
+        STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+        STATICFILES_STORAGE = 'school_chale_hum.storage_backends.StaticStorage'
+        # s3 public media settings
+        AWS_PUBLIC_MEDIA_LOCATION = 'portfolio/school_chale_hum/media'
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_PUBLIC_MEDIA_LOCATION}/'
+        DEFAULT_FILE_STORAGE = 'school_chale_hum.storage_backends.PublicMediaStorage'
+        # s3 private media settings
+        PRIVATE_MEDIA_LOCATION = 'portfolio/school_chale_hum/private'
+        PRIVATE_FILE_STORAGE = 'school_chale_hum.storage_backends.PrivateMediaStorage'
+
+    elif BUCKET_TYPE == 'BLACKBLAZE':
+
+        AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+        AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+        AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+        AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+
+        AWS_S3_ENDPOINT = f's3.{AWS_S3_REGION_NAME}.backblazeb2.com'
+        AWS_S3_ENDPOINT_URL = f'https://{AWS_S3_ENDPOINT}'
+        
+        AWS_DEFAULT_ACL = 'public-read'
+        AWS_S3_OBJECT_PARAMETERS = {
+            'CacheControl': 'max-age=86400',
+        }
+
+        AWS_LOCATION = 'static'
+        AWS_QUERYSTRING_AUTH = False
+        AWS_HEADERS = {
+            'Access-Control-Allow-Origin': '*',
+        }
+        # s3 static settings
+        AWS_STATIC_LOCATION = 'portfolio/school_chale_hum/static'
+        STATIC_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_STATIC_LOCATION}/'
+        STATICFILES_STORAGE = 'school_chale_hum.storage_backends.StaticStorage'
+        # s3 public media settings
+        AWS_PUBLIC_MEDIA_LOCATION = 'portfolio/school_chale_hum/media'
+        MEDIA_URL = f'https://{AWS_STORAGE_BUCKET_NAME}.{AWS_PUBLIC_MEDIA_LOCATION}/'
+        DEFAULT_FILE_STORAGE = 'school_chale_hum.storage_backends.PublicMediaStorage'
+        # s3 private media settings
+        PRIVATE_MEDIA_LOCATION = 'portfolio/school_chale_hum/private'
+        PRIVATE_FILE_STORAGE = 'school_chale_hum.storage_backends.PrivateMediaStorage'
+
+
 else:
     # Static files (CSS, JavaScript, Images)
     # https://docs.djangoproject.com/en/3.2/howto/static-files/
@@ -170,7 +208,11 @@ else:
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static"), ]
 
+# Default primary key field type
+# https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 AUTH_USER_MODEL = "account.Account"
 
 # Login_required Decorator
@@ -183,9 +225,10 @@ LOGIN_REDIRECT_URL = "/"
 MAIL_JET_API_KEY = config('MAIL_JET_API_KEY')
 MAIL_JET_API_SECRET = config('MAIL_JET_API_SECRET')
 
+#Caching
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": config('REDIS_URL'),
+        "LOCATION": config('REDISCLOUD_URL'),
     }
 }

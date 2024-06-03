@@ -1,6 +1,13 @@
 pipeline {
     agent { label 'local' }
     stages {
+        stage('Dependencies') {
+            steps {
+                script {
+                    sh "sudo cp /root/projectenvs/school_chale_hum/.env /var/lib/jenkins/workspace/school_chale_hum"
+                }
+            }
+        }
         stage('Production') {
             steps {
                 script {
