@@ -12,13 +12,13 @@
 
 -Deployed on Heroku
 
-1. Used Heroku Postgres 
-2. Used Gunicorn
-3. Used REDIS-CLOUD Sever, provided by heroku add-ons
+1. Used Postgres 
+2. Used Daphene
+3. Used REDIS
 
--Deployed on AWS / Now in My Own Home Ubuntu Server LTS 22.0 
+-Deployed on AWS / Now in My Own Home Ubuntu Server LTS 22.0 / Hostinger VPS Server
 
-1. Used AWS EC2 Ubuntu 22.0 LTS
+1. Used Ubuntu 22.0 LTS
 2. Used Nginx as a Web Proxy Server
 3. Used Let's Encrypt Wildcard certificate 
 4. Used Acme-dns server for automating renewal of wildcard certificates
@@ -41,6 +41,8 @@ Django is a Python-based free and open-source web framework that follows the mod
 Redis is an in-memory data structure project implementing a distributed, in-memory key-value database with optional durability. 
 The most common Redis use cases are session cache, full-page cache, queues, leaderboards and counting, publish-subscribe, and much more. in this case, we will use Redis as a message broker.
 
+## What is Ajax?
+Ajax is a set of web development techniques that uses various web technologies on the client-side to create asynchronous web applications. With Ajax, web applications can send and retrieve data from a server asynchronously without interfering with the display and behaviour of the existing page.
 
 ## Tech Stack
 
@@ -1061,7 +1063,7 @@ Note: agent {label 'local'} is used to specify which node will execute the jenki
 
 Make sure to use Pipline project and name it whatever you want I have named it as school_chale_hum
 
-![Jenkins Project for borcelle CRM Configuration File](https://github.com/arpansahu/borcelle_crm/blob/master/borcelle_crm_jenkins_config.png?raw=true)
+![Jenkins Project for borcelle CRM Configuration File](/school_chale_hum-Config-Jenkins-.png)
 
 In this above picture you can see credentials right? you can add your github credentials
 from Manage Jenkins on home Page --> Manage Credentials
