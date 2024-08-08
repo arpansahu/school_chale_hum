@@ -9,5 +9,5 @@ spec:
     - protocol: TCP
       port: 8002
       targetPort: 8002
-      nodePort: 32002
+      nodePort: 32013
   type: NodePort
