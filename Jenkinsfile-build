@@ -152,7 +152,7 @@ pipeline {
                 }'"""
 
                 // Trigger django_starter job only if the build is stable
-                build job: 'django_starter', parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
+                build job: 'school_chale_hum', parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
             }
         }
         failure {

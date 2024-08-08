@@ -1,1 +1,1 @@
-django_starter.arpansahu.me
+school-chale-hum.arpansahu.me

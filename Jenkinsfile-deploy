@@ -11,7 +11,7 @@ pipeline {
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
         NGINX_CONF = "/etc/nginx/sites-available/school-chale-hum"
         ENV_PROJECT_NAME = "school_chale_hum"
-        DOCKER_PORT = "8016"
+        DOCKER_PORT = "8013"
         PROJECT_NAME_WITH_DASH = "school-chale-hum"
     }
     stages {

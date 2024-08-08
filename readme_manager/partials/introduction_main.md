@@ -1,4 +1,4 @@
-# django_starter | Django Project CRUD using AJAX, DJANGO FORMS, GRAPHQL and DJANGO REST/GRAPHQL APIs
+# school_chale_hum | Django Project CRUD using AJAX, DJANGO FORMS, GRAPHQL and DJANGO REST/GRAPHQL APIs
 
 This is a simple django CRUD project
 
@@ -13,6 +13,8 @@ This is a simple django CRUD project
 7. **Kubernetes-native** Kubernetes support also available.
 8. **CI/CD Pipeline:** Continuous integration and deployment included using Jenkins.
 
-# Starter Project 
+# Implemented Student Manager
 
-Can be cloned and used as a base project for any django project
+1. Django app for managing students, their respective schools and books
+2. Every student's progress with a particular book can be seen on the app
+3. Built Django Command for extracting data from csv and storing it into database

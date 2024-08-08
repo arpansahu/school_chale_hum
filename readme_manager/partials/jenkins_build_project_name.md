@@ -1,1 +1,1 @@
-django_starter_build
+school_chale_hum_build
