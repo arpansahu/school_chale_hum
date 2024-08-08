@@ -86,5 +86,5 @@ spec:
                   name: school-chale-hum-secret
                   key: PROTOCOL
           ports:
-            - containerPort: 8002
+            - containerPort: 8013
               name: daphne

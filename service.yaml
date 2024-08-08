@@ -7,7 +7,7 @@ spec:
     app: school-chale-hum
   ports:
     - protocol: TCP
-      port: 8002
-      targetPort: 8002
+      port: 8013
+      targetPort: 8013
       nodePort: 32013
   type: NodePort

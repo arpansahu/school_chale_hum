@@ -81,5 +81,5 @@ spec:
                   name: school-chale-hum-secret
                   key: MAIL_JET_EMAIL_ADDRESS
           ports:
-            - containerPort: 8000
+            - containerPort: 8013
               name: daphne
