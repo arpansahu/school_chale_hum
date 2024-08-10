@@ -1538,7 +1538,7 @@ spec:
                   key: PROTOCOL
           ports:
             - containerPort: 8013
-              name: daphne
+              name: gunicorn
 ```
 
 3. Create a service.yaml file and fill it with the below contents.
