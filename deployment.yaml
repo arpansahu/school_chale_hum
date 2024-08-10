@@ -87,4 +87,4 @@ spec:
                   key: PROTOCOL
           ports:
             - containerPort: 8013
-              name: daphne
+              name: gunicorn
