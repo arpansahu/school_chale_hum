@@ -1016,11 +1016,9 @@ After adding rule schedule it as per requirement as below
 ![Add Retention Rule S](https://github.com/arpansahu/common_readme/blob/main/AWS%20Deployment/harbor/retention_rule_schedule.png)
 
 ```bash
-FROM python:3.10.7
+FROM python:3.10.7-slim
 
 WORKDIR /app
-
-COPY requirements.txt requirements.txt
 
 COPY . .
 
@@ -1028,8 +1026,7 @@ RUN pip3 install -r requirements.txt
 
 EXPOSE 8013
 
-CMD python manage.py collectstatic
-CMD gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi
+CMD bash -c "python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
 ```
 
 Create a file named docker-compose.yml and add following lines in it
