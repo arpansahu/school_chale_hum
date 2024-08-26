@@ -1,4 +1,4 @@
-# School Chale Hum | Django Project CRUD using AJAX, DJANGO FORMS, GRAPHQL and DJANGO REST/GRAPHQL APIs
+# School Chale Hum | Django School Management App
 
 This is a simple django CRUD project
 
