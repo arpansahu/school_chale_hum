@@ -12,6 +12,7 @@ This is a simple django CRUD project
 6. **Dockerized Project:** Fully containerized for easy deployment.
 7. **Kubernetes-native** Kubernetes support also available.
 8. **CI/CD Pipeline:** Continuous integration and deployment included using Jenkins.
+9. **Sentry Integrated:** Logging and Debugging Made Easy.
 
 # Implemented Student Manager
 
