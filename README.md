@@ -1,4 +1,4 @@
-# School Chale Hum | Django Custom Rest View Implementation
+# School Chale Hum | Django Project CRUD using AJAX, DJANGO FORMS, GRAPHQL and DJANGO REST/GRAPHQL APIs
 
 This is a simple django CRUD project
 
