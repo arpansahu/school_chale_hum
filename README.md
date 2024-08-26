@@ -1,7 +1,5 @@
 # School Chale Hum | Django School Management App
 
-This is a simple django CRUD project
-
 ## Project Features
 
 1. **Account Functionality:** Complete account management.
@@ -16,9 +14,11 @@ This is a simple django CRUD project
 
 # Implemented Student Manager
 
-1. Django app for managing students, their respective schools and books
-2. Every student's progress with a particular book can be seen on the app
-3. Built Django Command for extracting data from csv and storing it into database
+1. Developed a Django application for managing students, their schools, and associated books. 
+2. Implemented functionality to track and display each student's progress with specific books. 
+3. Engineered a custom Django command for extracting data from CSV files and populating the database. 
+4. Deployed on Ubuntu VPS, containerized with Docker/Kubernetes, and enabled CI/CD pipelines for automated testing, building, and deployment. 
+5. Integrated Automatic Readme Generator Github
 
 -Deployed on AWS / Now in My Own Home Ubuntu Server LTS 22.0 / Hostinger VPS Server
 
@@ -55,20 +55,21 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 [![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Glossary/HTML5)
 [![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![JQuery](https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white)(https://jquery.com/)]
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 [![Javascript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://www.javascript.com/)
 [![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs/)
 [![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
 [![Github](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://www.github.com/)
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)(https://goharbor.io/)
+[![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)](https://goharbor.io/)
 [![Kubernetes](https://img.shields.io/badge/kubernetes-326ce5.svg?&style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white)](https://www.jenkins.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/en/)
-![MINIIO](https://img.shields.io/badge/MINIO-TEXT?style=for-the-badge&logo=minio&logoColor=white&color=%23C72E49)(https://min.io/)
+[![MINIIO](https://img.shields.io/badge/MINIO-TEXT?style=for-the-badge&logo=minio&logoColor=white&color=%23C72E49)](https://min.io/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 [![Mail Jet](https://img.shields.io/badge/MAILJET-9933CC?style=for-the-badge&logo=minutemailer&logoColor=white)](https://mailjet.com/)
-
+[![Sentry Badge](https://img.shields.io/badge/Sentry-362D59?logo=sentry&logoColor=fff&style=for-the-badge)](https://sentry.io)
 
 ## Demo
 
@@ -129,20 +130,6 @@ Run Server
   or 
 
   gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi
-```
-
-Use these CACHE settings
-
-```python
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDISCLOUD_URL'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
 ```
 
 Change settings.py static files and media files settings | Now I have added support for BlackBlaze Static Storage also which also based on AWS S3 protocols 
@@ -248,6 +235,105 @@ python manage.py collectstatic
 ```
 
 and you are good to go
+
+
+Use these CACHE settings
+
+```python
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_CLOUD_URL,
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': PROJECT_NAME
+    }
+}
+
+```
+
+Use these Sentry Settings for Logging
+
+```python
+def get_git_commit_hash():
+    try:
+        return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+    except Exception:
+        return None
+
+sentry_sdk.init(
+    dsn=SENTRY_DSH_URL,
+    integrations=[
+            DjangoIntegration(
+                transaction_style='url',
+                middleware_spans=True,
+                # signals_spans=True,
+                # signals_denylist=[
+                #     django.db.models.signals.pre_init,
+                #     django.db.models.signals.post_init,
+                # ],
+                # cache_spans=False,
+            ),
+        ],
+    traces_sample_rate=1.0,  # Adjust this according to your needs
+    send_default_pii=True,  # To capture personal identifiable information (optional)
+    release=get_git_commit_hash(),  # Set the release to the current git commit hash
+    environment=SENTRY_ENVIRONMENT,  # Or "staging", "development", etc.
+    # profiles_sample_rate=1.0,
+)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+        'sentry': {
+            'level': 'ERROR',  # Change this to WARNING or INFO if needed
+            'class': 'sentry_sdk.integrations.logging.EventHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'sentry'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'sentry'],
+            'level': 'ERROR',  # Only log errors to Sentry
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console', 'sentry'],
+            'level': 'ERROR',  # Only log errors to Sentry
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console', 'sentry'],
+            'level': 'WARNING',  # You can set this to INFO or DEBUG as needed
+            'propagate': False,
+        },
+        # You can add more loggers here if needed
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+    },
+}
+```
+
+Also for setting up relays include Loader Script in base.html
+
+```html
+<script src="https://js.sentry-cdn.com/{random_unique_code_get_from_sentry_ui}.min.js" crossorigin="anonymous"></script>
+```
 
 
 ## Custom Django Management Commands
@@ -1029,13 +1115,15 @@ version: '3'
 
 services:
   web:
-    build: .
+    build:  # This section will be used when running locally
+      context: .
+      dockerfile: Dockerfile
+    image: harbor.arpansahu.me/library/school_chale_hum:latest
     env_file: ./.env
     command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
-    image: school_chale_hum
     container_name: school_chale_hum
     volumes:
-      - .:/school_chale_hum
+      - .:/app
     ports:
       - "8013:8013"
     restart: unless-stopped
@@ -2285,8 +2373,8 @@ stage('Dependencies') {
 1. Create a new configuration file: Create a new file in the Nginx configuration directory. The location of this directory varies depending on your  operating system and Nginx installation, but it’s usually found at /etc/nginx/sites-available/.
 
   ```bash
-    touch /etc/nginx/sites-available/django_starter
-    vi /etc/nginx/sites-available/django_starter
+    touch /etc/nginx/sites-available/school-chale-hum
+    vi /etc/nginx/sites-available/school-chale-hum
   ```
 
 2.	Add the server block configuration: Copy and paste your server block configuration into this new file.
@@ -2358,7 +2446,7 @@ stage('Dependencies') {
 3.	Enable the new configuration: Create a symbolic link from this file to the sites-enabled directory.
 
     ```bash
-      sudo ln -s /etc/nginx/sites-available/django_starter /etc/nginx/sites-enabled/
+      sudo ln -s /etc/nginx/sites-available/school-chale-hum /etc/nginx/sites-enabled/
     ```
 
 4.	Test the Nginx configuration: Ensure that the new configuration doesn’t have any syntax errors.
@@ -2531,7 +2619,7 @@ pipeline {
                     ]
                 }'"""
 
-                // Trigger django_starter job only if the build is stable
+                // Trigger school_chale_hum job only if the build is stable
                 build job: 'school_chale_hum', parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
             }
         }
@@ -2586,6 +2674,11 @@ pipeline {
         ENV_PROJECT_NAME = "school_chale_hum"
         DOCKER_PORT = "8013"
         PROJECT_NAME_WITH_DASH = "school-chale-hum"
+        SERVER_NAME= "school-chale-hum.arpansahu.me"
+        BUILD_PROJECT_NAME = "school_chale_hum_build"
+        JENKINS_DOMAIN = "jenkins.arpansahu.me"
+        SENTRY_ORG="arpansahu"
+        SENTRY_PROJECT="school_chale_hum"
     }
     stages {
         stage('Initialize') {
@@ -2613,14 +2706,77 @@ pipeline {
                 }
             }
         }
-        stage('Extract Port from Dockerfile') {
+        stage('Check & Create Nginx Configuration') {
             steps {
                 script {
-                    env.EXPOSED_PORT = sh(script: "grep '^EXPOSE' Dockerfile | awk '{print \$2}'", returnStdout: true).trim()
-                    if (!env.EXPOSED_PORT) {
-                        error "No EXPOSE directive found in Dockerfile"
+                    // Check if the Nginx configuration file exists
+                    def configExists = sh(script: "test -f ${NGINX_CONF} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+
+                    if (configExists == 'not exists') {
+                        echo "Nginx configuration file does not exist. Creating it now..."
+
+                        // Create or overwrite the NGINX_CONF file with the content of nginx.conf using sudo tee
+                        sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF} > /dev/null"
+
+                        // Replace placeholders in the configuration file
+                        sh "sudo sed -i 's|SERVER_NAME|${SERVER_NAME}|g' ${NGINX_CONF}"
+                        sh "sudo sed -i 's|DOCKER_PORT|${DOCKER_PORT}|g' ${NGINX_CONF}"
+
+                        echo "Nginx configuration file created."
+
+                        // Ensure Nginx is aware of the new configuration
+                        sh "sudo ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/"
                     } else {
-                        echo "Exposed port found in Dockerfile: ${env.EXPOSED_PORT}"
+                        echo "Nginx configuration file already exists."
+                    }                    
+                }
+            }
+        }
+        stage('Retrieve Image Tag from Build Job') {
+            when {
+                expression { params.DEPLOY}
+            }
+            steps {
+                script {
+                    echo "Retrieve image tag from ${BUILD_PROJECT_NAME}"
+
+                    // Construct the API URL for the latest build
+                    def api_url = "https://${JENKINS_DOMAIN}/job/${BUILD_PROJECT_NAME}/lastSuccessfulBuild/api/json"
+
+                    // Log the API URL for debugging purposes
+                    echo "Hitting API URL: ${api_url}"
+                    
+                    withCredentials([usernamePassword(credentialsId: 'fc364086-fb8b-4528-bc7f-1ef3f42b71c7', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_PASS')]) {
+                        // Execute the curl command to retrieve the JSON response
+                        echo "usernameVariable: ${JENKINS_USER}, passwordVariable: ${JENKINS_PASS}"
+                        def buildInfoJson = sh(script: "curl -u ${JENKINS_USER}:${JENKINS_PASS} ${api_url}", returnStdout: true).trim()
+
+                        // Log the raw JSON response for debugging
+                        echo "Raw JSON response: ${buildInfoJson}"
+
+                        def imageTag = sh(script: """
+                            echo '${buildInfoJson}' | grep -oP '"number":\\s*\\K\\d+' | head -n 1
+                        """, returnStdout: true).trim()
+
+                        echo "Retrieved image tag (build number): ${imageTag}"
+
+
+                        // Check if REGISTRY, REPOSITORY, and imageTag are all defined and not empty
+                        if (REGISTRY && REPOSITORY && imageTag) {
+                            if (params.DEPLOY_TYPE == 'kubernetes') {
+                                // Replace the placeholder in the deployment YAML
+                                sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
+                            }   
+                            
+                            if (params.DEPLOY_TYPE == 'docker') {
+                                // Ensure the correct image tag is used in the docker-compose.yml
+                                sh """
+                                sed -i 's|image: .*|image: ${REGISTRY}/${REPOSITORY}:${imageTag}|' docker-compose.yml
+                                """
+                            }
+                        } else {
+                            echo "One or more required variables (REGISTRY, REPOSITORY, imageTag) are not defined or empty. Skipping docker-compose.yml update."
+                        }
                     }
                 }
             }
@@ -2636,27 +2792,20 @@ pipeline {
                         // Copy the .env file to the workspace
                         sh "sudo cp /root/projectenvs/${ENV_PROJECT_NAME}/.env ${env.WORKSPACE}/"
 
-                        // Ensure the correct image tag is used in the docker-compose.yml
-                        sh '''
-                        sed -i "s|image: .*|image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG}|" docker-compose.yml
-                        '''
-                        // Deploy using Docker Compose
                         sh 'docker-compose down'
+                        sh 'docker-compose pull'
                         sh 'docker-compose up -d'
 
-                        // Wait for a few seconds to let the app start
-                        sleep 10
+                        sleep 60
 
-                        // Verify the container is running
                         def containerRunning = sh(script: "docker ps -q -f name=${ENV_PROJECT_NAME}", returnStdout: true).trim()
                         if (!containerRunning) {
                             error "Container ${ENV_PROJECT_NAME} is not running"
                         } else {
                             echo "Container ${ENV_PROJECT_NAME} is running"
-                            // Execute curl and scale down Kubernetes deployment if curl is successful
                             sh """
                                 # Fetch HTTP status code
-                                HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" http://0.0.0.0:${DOCKER_PORT})
+                                HTTP_STATUS=\$(curl -s -o /dev/null -w "%{http_code}" -L http://0.0.0.0:${DOCKER_PORT})
                                 echo "HTTP Status: \$HTTP_STATUS"
                                 
                                 # Update Nginx configuration if status code is 200 (OK)
@@ -2698,11 +2847,11 @@ pipeline {
                             """
 
                             // Delete the existing service and deployment
-                            sh """
-                            kubectl delete service ${PROJECT_NAME_WITH_DASH}-service || true
-                            kubectl scale deployment ${PROJECT_NAME_WITH_DASH}-app --replicas=0 || true
-                            kubectl delete deployment ${PROJECT_NAME_WITH_DASH}-app || true
-                            """
+                            // sh """
+                            // kubectl delete service ${PROJECT_NAME_WITH_DASH}-service || true
+                            // kubectl scale deployment ${PROJECT_NAME_WITH_DASH}-app --replicas=0 || true
+                            // kubectl delete deployment ${PROJECT_NAME_WITH_DASH}-app || true
+                            // """
 
                             // Deploy to Kubernetes
                             sh """
@@ -2778,6 +2927,29 @@ pipeline {
                         }
                     }
                     currentBuild.description = 'DEPLOYMENT_EXECUTED'
+                }
+            }
+        }
+        stage('Sentry release') {
+            when {
+                expression { params.DEPLOY }
+            }
+            steps {
+                script {
+                    echo "Sentry Release ..."
+
+                    sh """
+                        # Get the current git commit hash
+                        VERSION=\$(git rev-parse HEAD)
+
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} new \$VERSION
+
+                        # Associate commits with the release
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} set-commits --auto \$VERSION
+
+                        # Deploy the release (optional step for marking the release as deployed)
+                        sentry-cli releases -o ${SENTRY_ORG} -p ${SENTRY_PROJECT} deploys \$VERSION new -e production
+                    """
                 }
             }
         }
@@ -4212,20 +4384,21 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 [![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)](https://www.djangoproject.com/)
 [![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Glossary/HTML5)
 [![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![JQuery](https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white)(https://jquery.com/)]
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 [![Javascript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E)](https://www.javascript.com/)
 [![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs/)
 [![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
 [![Github](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://www.github.com/)
 [![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
-![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)(https://goharbor.io/)
+[![Harbor](https://img.shields.io/badge/HARBOR-TEXT?style=for-the-badge&logo=harbor&logoColor=white&color=blue)](https://goharbor.io/)
 [![Kubernetes](https://img.shields.io/badge/kubernetes-326ce5.svg?&style=for-the-badge&logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Jenkins](https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white)](https://www.jenkins.io/)
 [![Nginx](https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white)](https://nginx.org/en/)
-![MINIIO](https://img.shields.io/badge/MINIO-TEXT?style=for-the-badge&logo=minio&logoColor=white&color=%23C72E49)(https://min.io/)
+[![MINIIO](https://img.shields.io/badge/MINIO-TEXT?style=for-the-badge&logo=minio&logoColor=white&color=%23C72E49)](https://min.io/)
 [![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)](https://ubuntu.com/)
 [![Mail Jet](https://img.shields.io/badge/MAILJET-9933CC?style=for-the-badge&logo=minutemailer&logoColor=white)](https://mailjet.com/)
-
+[![Sentry Badge](https://img.shields.io/badge/Sentry-362D59?logo=sentry&logoColor=fff&style=for-the-badge)](https://sentry.io)
 
 ## Environment Variables
 
@@ -4249,17 +4422,24 @@ AWS_STORAGE_BUCKET_NAME=
 
 BUCKET_TYPE=
 
-DOMAIN=
+DATABASE_URL=
+
+REDIS_CLOUD_URL=
+
+DOMAIN= 
 
 PROTOCOL=
 
-DATABASE_URL=
+# SENTRY
+SENTRY_ENVIRONMENT=
 
-REDISCLOUD_URL=
+SENTRY_DSH_URL=
 
 # deploy_kube.sh requirements
 HARBOR_USERNAME=
 
 HARBOR_PASSWORD=
+
+
 
 
