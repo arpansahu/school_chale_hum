@@ -330,4 +330,4 @@ LOGGING = {
     },
 }
 
-# CSRF_TRUSTED_ORIGINS = ['https://arpansahu.me', ]
+CSRF_TRUSTED_ORIGINS = ['https://school-chale-hum.arpansahu.me', ]
