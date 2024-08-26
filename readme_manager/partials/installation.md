@@ -44,21 +44,11 @@ Run Server
   gunicorn --bind 0.0.0.0:[PROJECT_DOCKER_PORT] [JENKINS PROJECT NAME].wsgi
 ```
 
-Use these CACHE settings
-
-```python
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDISCLOUD_URL'),
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
-}
-```
-
 [STATIC_FILES]
+
+[CACHE]
+
+[SENTRY]
 
 ## Custom Django Management Commands
 

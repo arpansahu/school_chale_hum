@@ -1,7 +1,5 @@
 # School Chale Hum | Django School Management App
 
-This is a simple django CRUD project
-
 ## Project Features
 
 1. **Account Functionality:** Complete account management.
@@ -16,6 +14,8 @@ This is a simple django CRUD project
 
 # Implemented Student Manager
 
-1. Django app for managing students, their respective schools and books
-2. Every student's progress with a particular book can be seen on the app
-3. Built Django Command for extracting data from csv and storing it into database
+1. Developed a Django application for managing students, their schools, and associated books. 
+2. Implemented functionality to track and display each student's progress with specific books. 
+3. Engineered a custom Django command for extracting data from CSV files and populating the database. 
+4. Deployed on Ubuntu VPS, containerized with Docker/Kubernetes, and enabled CI/CD pipelines for automated testing, building, and deployment. 
+5. Integrated Automatic Readme Generator Github

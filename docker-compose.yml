@@ -2,13 +2,15 @@ version: '3'
 
 services:
   web:
-    build: .
+    build:  # This section will be used when running locally
+      context: .
+      dockerfile: Dockerfile
+    image: harbor.arpansahu.me/library/school_chale_hum:latest
     env_file: ./.env
     command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
-    image: school_chale_hum
     container_name: school_chale_hum
     volumes:
-      - .:/school_chale_hum
+      - .:/app
     ports:
       - "8013:8013"
     restart: unless-stopped

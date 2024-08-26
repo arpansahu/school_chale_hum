@@ -151,7 +151,7 @@ pipeline {
                     ]
                 }'"""
 
-                // Trigger django_starter job only if the build is stable
+                // Trigger school_chale_hum job only if the build is stable
                 build job: 'school_chale_hum', parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
             }
         }

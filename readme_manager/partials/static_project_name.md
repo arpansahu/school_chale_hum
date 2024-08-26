@@ -1,1 +1,1 @@
-django_starter
+school_chale_hum
