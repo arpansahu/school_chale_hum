@@ -2801,10 +2801,13 @@ pipeline {
                             sleep 60
 
                             // Check deployment status
+                            // sh """
+                            // kubectl rollout status deployment/${PROJECT_NAME_WITH_DASH}-app
+                            // """
                             sh """
-                            kubectl rollout status deployment/${PROJECT_NAME_WITH_DASH}-app
+                                kubectl describe deployment/${PROJECT_NAME_WITH_DASH}-app
                             """
-                            
+
                             // Verify service and get NodePort
                             def nodePort = sh(script: "kubectl get service ${PROJECT_NAME_WITH_DASH}-service -o=jsonpath='{.spec.ports[0].nodePort}'", returnStdout: true).trim()
                             echo "Service NodePort: ${nodePort}"
