@@ -79,7 +79,7 @@ The most common Redis use cases are session cache, full-page cache, queues, lead
 
 ## Demo
 
-Available at: https://school-chale-hum.arpansahu.me
+Available at: https://school-chale-hum.arpansahu.space
 
 admin login details:--
 username: arpansahu
@@ -197,7 +197,7 @@ if not DEBUG:
 
     elif BUCKET_TYPE == 'MINIO':
         AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.spacee'
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.space'
         AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400',
@@ -503,7 +503,7 @@ This project and all related services have evolved through multiple deployment s
 - Limited control over infrastructure
 
 **Phase 2: EC2 + Home Server Hybrid (2022-2023)**
-- EC2 for portfolio (arpansahu.spacee) with Nginx
+- EC2 for portfolio (arpansahu.me) with Nginx
 - Home Server for all other projects
 - Nginx on EC2 forwarded traffic to Home Server
 - Cost-effective but faced reliability challenges
@@ -813,7 +813,7 @@ As of January 2026, I'm running a home server setup with:
 - All services accessible via arpansahu.space
 - Automated backups to cloud storage
 
-Live projects: https://arpansahu.spacee/projects
+Live projects: https://arpansahu.me/projects
 
 ### Next Steps
 
@@ -2157,7 +2157,7 @@ services:
     build:  # This section will be used when running locally
       context: .
       dockerfile: Dockerfile
-    image: harbor.arpansahu.me/library/school_chale_hum:latest
+    image: harbor.arpansahu.space/library/school_chale_hum:latest
     env_file: ./.env
     command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
     container_name: school_chale_hum
@@ -3273,7 +3273,7 @@ error_log                   /var/log/nginx/supersecure.error.log;
 
 server {
     listen         80;
-    server_name    school-chale-hum.arpansahu.me;
+    server_name    school-chale-hum.arpansahu.space;
     # force https-redirects
     if ($scheme = http) {
         return 301 https://$server_name$request_uri;
@@ -3291,8 +3291,8 @@ server {
     }
 
     listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/arpansahu.me/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/arpansahu.me/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/arpansahu.space/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/arpansahu.space/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
@@ -10204,7 +10204,7 @@ pipeline {
 
 Note: agent {label 'local'} is used to specify which node will execute the jenkins job deployment. So local linux server is labelled with 'local' are the project with this label will be executed in local machine node.
 
-* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.me
+* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.space
 
 Make sure to use Pipeline project and name it whatever you want I have named it as per great_chat
 

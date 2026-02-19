@@ -196,7 +196,7 @@ if not DEBUG:
 
     elif BUCKET_TYPE == 'MINIO':
         AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.me'
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.space'
         AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400',
@@ -330,4 +330,4 @@ LOGGING = {
     },
 }
 
-CSRF_TRUSTED_ORIGINS = ['https://school-chale-hum.arpansahu.me', ]
+CSRF_TRUSTED_ORIGINS = ['https://school-chale-hum.arpansahu.space', ]

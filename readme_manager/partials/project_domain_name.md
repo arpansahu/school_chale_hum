@@ -1,1 +1,1 @@
-school-chale-hum.arpansahu.me
+school-chale-hum.arpansahu.space

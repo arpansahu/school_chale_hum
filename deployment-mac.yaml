@@ -17,7 +17,7 @@ spec:
       imagePullSecrets:
         - name: harbor-registry-secret
       containers:
-        - image: harbor.arpansahu.me/library/school_chale_hum_mac:latest
+        - image: harbor.arpansahu.space/library/school_chale_hum_mac:latest
           name: school-chale-hum-mac
           envFrom:
             - secretRef:

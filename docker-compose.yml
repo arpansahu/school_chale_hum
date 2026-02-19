@@ -5,7 +5,7 @@ services:
     build:  # This section will be used when running locally
       context: .
       dockerfile: Dockerfile
-    image: harbor.arpansahu.me/library/school_chale_hum:latest
+    image: harbor.arpansahu.space/library/school_chale_hum:latest
     env_file: ./.env
     command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
     container_name: school_chale_hum

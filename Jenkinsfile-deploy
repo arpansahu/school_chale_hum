@@ -5,7 +5,7 @@ pipeline {
         choice(name: 'DEPLOY_TYPE', choices: ['kubernetes', 'docker'], description: 'Select deployment type')
     }
     environment {
-        REGISTRY = "harbor.arpansahu.me"
+        REGISTRY = "harbor.arpansahu.space"
         REPOSITORY = "library/school_chale_hum"
         IMAGE_TAG = "latest"  // or use a specific tag if needed
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
@@ -13,9 +13,9 @@ pipeline {
         ENV_PROJECT_NAME = "school_chale_hum"
         DOCKER_PORT = "8013"
         PROJECT_NAME_WITH_DASH = "school-chale-hum"
-        SERVER_NAME= "school-chale-hum.arpansahu.me"
+        SERVER_NAME= "school-chale-hum.arpansahu.space"
         BUILD_PROJECT_NAME = "school_chale_hum_build"
-        JENKINS_DOMAIN = "jenkins.arpansahu.me"
+        JENKINS_DOMAIN = "jenkins.arpansahu.space"
         SENTRY_ORG="arpansahu"
         SENTRY_PROJECT="school_chale_hum"
     }
