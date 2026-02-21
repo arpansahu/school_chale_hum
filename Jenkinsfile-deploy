@@ -3,6 +3,7 @@ pipeline {
     parameters {
         booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Enable deployment')
         choice(name: 'DEPLOY_TYPE', choices: ['kubernetes', 'docker'], description: 'Select deployment type')
+        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
     }
     environment {
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
@@ -91,51 +92,31 @@ pipeline {
                 }
             }
         }
-        stage('Retrieve Image Tag from Build Job') {
+        stage('Prepare Deployment Config') {
             when {
                 expression { params.DEPLOY}
             }
             steps {
                 script {
-                    echo "Retrieve image tag from ${BUILD_PROJECT_NAME}"
+                    echo "Using image tag from build job: ${params.IMAGE_TAG}"
 
-                    // Construct the API URL for the latest build
-                    def api_url = "https://${env.JENKINS_DOMAIN}/job/${env.BUILD_PROJECT_NAME}/lastSuccessfulBuild/api/json"
-
-                    // Log the API URL for debugging purposes
-                    echo "Hitting API URL: ${api_url}"
-                    
-                    withCredentials([usernamePassword(credentialsId: 'fc364086-fb8b-4528-bc7f-1ef3f42b71c7', usernameVariable: 'JENKINS_USER', passwordVariable: 'JENKINS_PASS')]) {
-                        // Execute the curl command to retrieve the JSON response
-                        echo "usernameVariable: ${JENKINS_USER}, passwordVariable: ${JENKINS_PASS}"
-                        def buildInfoJson = sh(script: "curl -u ${JENKINS_USER}:${JENKINS_PASS} ${api_url}", returnStdout: true).trim()
-
-                        // Log the raw JSON response for debugging
-                        echo "Raw JSON response: ${buildInfoJson}"
-
-                        def imageTag = sh(script: """
-                            echo '${buildInfoJson}' | grep -oP '"number":\\s*\\K\\d+' | head -n 1
-                        """, returnStdout: true).trim()
-
-                        echo "Retrieved image tag (build number): ${imageTag}"
-
-
-                        // Check if REGISTRY, REPOSITORY, and imageTag are all defined and not empty
-                        if (env.REGISTRY && env.REPOSITORY && imageTag) {
-                            if (params.DEPLOY_TYPE == 'kubernetes') {
-                                // Replace the placeholder in the deployment YAML
-                                sh "sed -i 's|:latest|:${imageTag}|g' ${WORKSPACE}/deployment.yaml"
-                            }   
-                            
-                            if (params.DEPLOY_TYPE == 'docker') {
-                                // Ensure the correct image tag is used in the docker-compose.yml
-                                sh """
-                                sed -i 's|image: .*|image: ${env.REGISTRY}/${env.REPOSITORY}:${imageTag}|' docker-compose.yml
-                                """
-                            }
-                        } else {
-                            echo "One or more required variables (REGISTRY, REPOSITORY, imageTag) are not defined or empty. Skipping docker-compose.yml update."
+                    // Check if REGISTRY, REPOSITORY, and IMAGE_TAG are all defined and not empty
+                    if (env.REGISTRY && env.REPOSITORY && params.IMAGE_TAG) {
+                        if (params.DEPLOY_TYPE == 'kubernetes') {
+                            // Replace the placeholder in the deployment YAML
+                            sh "sed -i 's|:latest|:${params.IMAGE_TAG}|g' ${WORKSPACE}/deployment.yaml"
+                            echo "Updated deployment.yaml with image tag: ${params.IMAGE_TAG}"
+                        }   
+                        
+                        if (params.DEPLOY_TYPE == 'docker') {
+                            // Ensure the correct image tag is used in the docker-compose.yml
+                            sh """
+                            sed -i 's|image: .*|image: ${env.REGISTRY}/${env.REPOSITORY}:${params.IMAGE_TAG}|' docker-compose.yml
+                            """
+                            echo "Updated docker-compose.yml with image tag: ${params.IMAGE_TAG}"
                         }
+                    } else {
+                        error "Required variables (REGISTRY, REPOSITORY, IMAGE_TAG) are missing. Cannot proceed with deployment."
                     }
                 }
             }
