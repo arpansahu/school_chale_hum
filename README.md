@@ -197,7 +197,7 @@ if not DEBUG:
 
     elif BUCKET_TYPE == 'MINIO':
         AWS_S3_REGION_NAME = 'us-east-1'  # MinIO doesn't require this, but boto3 does
-        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.space'
+        AWS_S3_ENDPOINT_URL = 'https://minio.arpansahu.spacee'
         AWS_DEFAULT_ACL = 'public-read'
         AWS_S3_OBJECT_PARAMETERS = {
             'CacheControl': 'max-age=86400',
@@ -503,7 +503,7 @@ This project and all related services have evolved through multiple deployment s
 - Limited control over infrastructure
 
 **Phase 2: EC2 + Home Server Hybrid (2022-2023)**
-- EC2 for portfolio (arpansahu.me) with Nginx
+- EC2 for portfolio (arpansahu.spacee) with Nginx
 - Home Server for all other projects
 - Nginx on EC2 forwarded traffic to Home Server
 - Cost-effective but faced reliability challenges
@@ -813,7 +813,7 @@ As of January 2026, I'm running a home server setup with:
 - All services accessible via arpansahu.space
 - Automated backups to cloud storage
 
-Live projects: https://arpansahu.me/projects
+Live projects: https://arpansahu.spacee/projects
 
 ### Next Steps
 
@@ -2138,34 +2138,41 @@ FROM python:3.10.7
 
 WORKDIR /app
 
-COPY . .
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip3 install -r requirements.txt
+COPY . .
 
 EXPOSE 8013
 
-CMD bash -c "python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
+CMD bash -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
 ```
 
 Create a file named docker-compose.yml and add following lines in it
 
 ```bash
-version: '3'
+version: '3.8'
 
 services:
   web:
     build:  # This section will be used when running locally
       context: .
       dockerfile: Dockerfile
-    image: harbor.arpansahu.space/library/school_chale_hum:latest
+    image: ${DOCKER_REGISTRY}/${DOCKER_REPOSITORY}/${DOCKER_IMAGE_NAME}:latest
     env_file: ./.env
-    command: bash -c "python manage.py makemigrations && python manage.py migrate && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
-    container_name: school_chale_hum
+    command: bash -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:${DOCKER_PORT} school_chale_hum.wsgi"
+    container_name: ${ENV_PROJECT_NAME}
     volumes:
       - .:/app
     ports:
-      - "8013:8013"
+      - "${DOCKER_PORT}:${DOCKER_PORT}"
     restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 ```
 
 ### **What is Difference in Dockerfile and docker-compose.yml?**
@@ -10204,7 +10211,7 @@ pipeline {
 
 Note: agent {label 'local'} is used to specify which node will execute the jenkins job deployment. So local linux server is labelled with 'local' are the project with this label will be executed in local machine node.
 
-* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.space
+* Configure a Jenkins project from jenkins ui located at https://jenkins.arpansahu.me
 
 Make sure to use Pipeline project and name it whatever you want I have named it as per great_chat
 
@@ -10268,41 +10275,117 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 To run this project, you will need to add the following environment variables to your .env file
 
-SECRET_KEY=
+# ============================================
+# School Chale Hum Environment Configuration
+# ============================================
+# This file contains all environment variables for the application.
+# Copy this to .env and fill in your actual values.
+# ============================================
 
-DEBUG=
+# ============================================
+# Docker Registry Configuration
+# ============================================
+DOCKER_REGISTRY=harbor.arpansahu.space
+DOCKER_REPOSITORY=library
+DOCKER_IMAGE_NAME=school_chale_hum
+DOCKER_IMAGE_TAG=latest
 
-ALLOWED_HOSTS=
+# ============================================
+# Deployment Configuration
+# ============================================
+ENV_PROJECT_NAME=school_chale_hum
+SERVER_NAME=school-chale-hum.arpansahu.space
+DOCKER_PORT=8013
+JENKINS_DOMAIN=jenkins.arpansahu.space
 
-MAIL_JET_API_KEY=
+# ============================================
+# Django Configuration
+# ============================================
+SECRET_KEY=your-secret-key-here
 
-MAIL_JET_API_SECRET=
+# 1 for True, 0 for False
+DE============================================
+# Email Configuration (Mailjet)
+# ============================================
+MAIL_JET_API_KEY=your-mailjet-api-key
 
-AWS_ACCESS_KEY_ID=
+MAIL_JET_API_SECRET=your-mailjet-secret
 
-AWS_SECRET_ACCESS_KEY=
+# Verified sender email (must be verified in Mailjet)
+MAIL_JET_EMAIL_ADDRESS=noreply@arpansahu.space
 
-AWS_STORAGE_BUCKET_NAME=
+# Reply-to email for user responses
+MY_EMAIL_ADDRESS=your-email@example.com
 
-BUCKET_TYPE=
+# ============================================
+# Object Storage (MinIO)
+# ============================================
+# Using MinIO for object storage through nginx proxy
+# API Endpoint: minioapi.arpansahu.space (nginx proxy to MinIO API)
+# Console UI: minio.arpansahu.space (MinIO web console)
+# ============================================
+AWS_ACCESS_KEY_ID=your-minio-access-key
 
-DATABASE_URL=
+AWS_SECRET_ACCESS_KEY=your-minio-secret-key
 
-REDIS_CLOUD_URL=
+AWS_STORAGE_BUCKET_NAME=arpansahu-one-bucket
 
-DOMAIN= 
+# MinIO API endpoint (used by boto3/django-storages)
+AWS_S3_ENDPOINT_URL=https://minioapi.arpansahu.space
 
-PROTOCOL=
+# Custom domain for serving files (calculated: endpoint/bucket)
+AWS_S3_CUSTOM_DOMAIN=minioapi.arpansahu.space/arpansahu-one-bucket
 
-# SENTRY
-SENTRY_ENVIRONMENT=
+BUCKET_TYPE=MINIO
 
-SENTRY_DSH_URL=
+# ============================================
+# Django Configuration (continued)
+# ============================================
+DOMAIN=school-chale-hum.arpansahu.space
+
+PROTOCOL=https
+
+# ============================================
+# Database Configuration
+# ============================================
+DATABASE_URL=postgresql://postgres:your-password@arpansahu.space:9552/arpansahu_one_db?sslmode=require&options=-c%20search_path=school_chale_hum
+
+# ============================================
+# Redis Configuration
+# ============================================
+REDIS_CLOUD_URL=rediss://:your-redis-password@redis.arpansahu.space:9551?ssl_cert_reqs=none
+
+# ============================================
+# Error Tracking (Sentry)
+# ============================================
+SENTRY_ENVIRONMENT=production
+
+SENTRY_DSH_URL=https://your-sentry-dsn@o4507787065163776.ingest.us.sentry.io/your-project-id
+
+SENTRY_ORG=arpansahu
+
+SENTRY_PROJECT=school_chale_hum
+
+# Sentry Auth Token for CI/CD deployments (used in Jenkinsfile)
+SENTRY_AUTH_TOKEN=your-sentry-auth-token
+
+# ============================================
+# Harbor Registry Credentials
+# ============================================
+HARBOR_USERNAME=admin
+
+HARBOR_PASSWORD=your-harbor-password
+
+HARBOR_URL=https://harbor.arpansahu.space
+SENTRY_PROJECT=school_chale_hum
+SENTRY_ENVIRONMENT=production
+
+# Project Naming
+ENV_PROJECT_NAME=school_chale_hum
 
 # deploy_kube.sh requirements
-HARBOR_USERNAME=
-
-HARBOR_PASSWORD=
+HARBOR_USERNAME=your-harbor-username
+HARBOR_PASSWORD=your-harbor-password
 
 
 
