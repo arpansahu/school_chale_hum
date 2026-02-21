@@ -200,7 +200,6 @@ pipeline {
                 }
             }
         }
-    }
         stage('Sentry Release') {
             when {
                 expression { return BUILD_STATUS != 'NOT_BUILT' }
@@ -272,7 +271,8 @@ pipeline {
                                     },
                                     "To": [
                                             {
-                                                    "Email": "${env.MY_EMAIL_ADDRESS}
+                                                    "Email": "${env.MY_EMAIL_ADDRESS}",
+                                                    "Name": "Developer Team"
                                             }
                                     ],
                                     "Subject": "${currentBuild.fullDisplayName} build failed",
