@@ -116,6 +116,14 @@ pipeline {
                 allOf {
                     expression { return BUILD_STATUS != 'NOT_BUILT' }
                     expression { return !params.SKIP_TESTS }
+                    expression { 
+                        // Only run if test_ui.py files exist
+                        def uiTestFiles = sh(
+                            script: 'find . -name "test_ui.py" -o -name "*_ui_test.py" | wc -l',
+                            returnStdout: true
+                        ).trim().toInteger()
+                        return uiTestFiles > 0
+                    }
                 }
             }
             steps {
@@ -126,7 +134,7 @@ pipeline {
                         mcr.microsoft.com/playwright/python:v1.40.0-jammy bash -c '
                             pip install -q -r requirements.txt
                             playwright install chromium
-                            python manage.py migrate --settings=school_chale_hum.test_settings --verbosity=0
+                            python manage.py migrate --settings=school_chale_hum.test_settings
                             python manage.py runserver 0.0.0.0:8000 --settings=school_chale_hum.test_settings &
                             SERVER_PID=\\\$!
                             
@@ -139,7 +147,7 @@ pipeline {
                                 sleep 1
                             done
                             
-                            pytest */test_ui.py -m "ui and not todo" -v --tb=short -x || true
+                            pytest **/test_ui.py -m "ui and not todo" -v --tb=short -x || true
                             TEST_RESULT=\\\$?
                             kill \\\$SERVER_PID 2>/dev/null || true
                             exit \\\$TEST_RESULT
@@ -154,8 +162,9 @@ pipeline {
             }
             steps {
                 script {
-                    // Copy .env file to the workspace
-                    sh "sudo cp /root/projectenvs/${ENV_PROJECT_NAME}/.env ${env.WORKSPACE}/"
+                    echo "Dependencies stage - .env already configured in Setup Environment"
+                    // .env file already created in Setup Environment stage
+                    sh "ls -la .env"
                 }
             }
         }

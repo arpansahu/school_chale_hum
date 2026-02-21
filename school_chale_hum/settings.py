@@ -57,7 +57,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'account',
-    'school'
+    'school',
+    'check_service_health',
 ]
 
 MIDDLEWARE = [

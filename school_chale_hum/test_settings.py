@@ -12,7 +12,8 @@ DATABASES = {
     }
 }
 
-# Disable migrations for faster test execution
+# Disable migrations for faster test execution (unit tests only)
+# NOTE: For UI tests that need migrations, this will be overridden via --run-syncdb
 class DisableMigrations:
     def __contains__(self, item):
         return True
@@ -20,7 +21,10 @@ class DisableMigrations:
     def __getitem__(self, item):
         return None
 
-MIGRATION_MODULES = DisableMigrations()
+# Only disable migrations if DISABLE_MIGRATIONS env var is set
+import os
+if os.getenv('DISABLE_MIGRATIONS', 'false').lower() == 'true':
+    MIGRATION_MODULES = DisableMigrations()
 
 # Disable password hashing for faster user creation
 PASSWORD_HASHERS = [
