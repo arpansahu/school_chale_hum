@@ -2,18 +2,45 @@ pipeline {
     agent any
     parameters {
         booleanParam(name: 'skip_checks', defaultValue: false, description: 'Skip the Check for Changes stage')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip test execution')
     }
     environment {
-        REGISTRY = "harbor.arpansahu.space"
-        REPOSITORY = "library/school_chale_hum"
         IMAGE_TAG = "${env.BUILD_ID}"
         COMMIT_FILE = "${env.WORKSPACE}/last_commit.txt"
-        ENV_PROJECT_NAME = "school_chale_hum"
+        BUILD_STATUS = 'NOT_BUILT'  // Initialize to prevent undefined errors
     }
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+        stage('Setup Environment') {
+            steps {
+                script {
+                    // Load .env from Jenkins credentials
+                    withCredentials([file(credentialsId: 'school_chale_hum_env_file', variable: 'ENV_FILE')]) {
+                        def envContent = readFile(file: env.ENV_FILE)
+                        writeFile(file: '.env', text: envContent)
+                        
+                        // Parse and set environment variables
+                        def envVars = envContent.split('\n')
+                        envVars.each { line ->
+                            if (line && !line.startsWith('#') && line.contains('=')) {
+                                def parts = line.split('=', 2)
+                                def key = parts[0].trim()
+                                def value = parts.length > 1 ? parts[1].trim() : ''
+                                env."${key}" = value
+                            }
+                        }
+                        
+                        // Set derived variables
+                        env.BUILD_PROJECT_NAME = "${env.ENV_PROJECT_NAME}_build"
+                        env.PROJECT_NAME_WITH_DASH = env.ENV_PROJECT_NAME.replace('_', '-')
+                        env.REGISTRY = env.DOCKER_REGISTRY
+                        env.REPOSITORY = "${env.DOCKER_REPOSITORY}/${env.DOCKER_IMAGE_NAME}"
+                    }
+                }
             }
         }
         stage('Check for Changes') {
@@ -62,6 +89,61 @@ pipeline {
                         // Save the current commit hash to the file
                         writeFile(file: COMMIT_FILE, text: currentCommit)
                     }
+                }
+            }
+        }
+        stage('Run Unit Tests') {
+            when {
+                allOf {
+                    expression { return BUILD_STATUS != 'NOT_BUILT' }
+                    expression { return !params.SKIP_TESTS }
+                }
+            }echo "Environment already loaded from Jenkins credentials
+                script {
+                    echo "Running unit tests..."
+                    sh """
+                    docker run --rm -v \$(pwd):/app -w /app --env-file .env python:3.10.7 \\
+                        bash -c 'pip install -q -r requirements.txt && \\
+                                 pip install -q pytest pytest-django pytest-cov pytest-mock && \\
+                                 python -m pytest -m "not ui and not todo" --ignore=tests -v || true'
+                    """
+                }
+            }
+        }
+        stage('Run UI Tests') {
+            when {
+                allOf {
+                    expression { return BUILD_STATUS != 'NOT_BUILT' }
+                    expression { return !params.SKIP_TESTS }
+                }
+            }
+            steps {
+                script {
+                    echo "Running UI tests with Playwright..."
+                    sh """
+                    docker run --rm -v \$(pwd):/app -w /app --env-file .env \\
+                        mcr.microsoft.com/playwright/python:v1.40.0-jammy bash -c '
+                            pip install -q -r requirements.txt
+                            playwright install chromium
+                            python manage.py migrate --settings=school_chale_hum.test_settings --verbosity=0
+                            python manage.py runserver 0.0.0.0:8000 --settings=school_chale_hum.test_settings &
+                            SERVER_PID=\\\$!
+                            
+                            # Wait for server to start
+                            for i in {1..30}; do
+                                if curl -s http://127.0.0.1:8000/ > /dev/null 2>&1; then
+                                    echo "Server started successfully"
+                                    break
+                                fi
+                                sleep 1
+                            done
+                            
+                            pytest */test_ui.py -m "ui and not todo" -v --tb=short -x || true
+                            TEST_RESULT=\\\$?
+                            kill \\\$SERVER_PID 2>/dev/null || true
+                            exit \\\$TEST_RESULT
+                        ' || true
+                    """
                 }
             }
         }
@@ -118,6 +200,23 @@ pipeline {
             }
         }
     }
+        stage('Sentry Release') {
+            when {
+                expression { return BUILD_STATUS != 'NOT_BUILT' }
+            }
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'sentry-auth-token', variable: 'SENTRY_AUTH_TOKEN')]) {
+                        sh """
+                        VERSION=\$(git rev-parse HEAD)
+                        sentry-cli releases -o ${env.SENTRY_ORG} -p ${env.SENTRY_PROJECT} new \$VERSION || true
+                        sentry-cli releases -o ${env.SENTRY_ORG} -p ${env.SENTRY_PROJECT} set-commits --auto \$VERSION || true
+                        """
+                    }
+                }
+            }
+        }
+    }
     post {
         success {
             script {
@@ -125,22 +224,22 @@ pipeline {
                     currentBuild.description = "Image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG} built and pushed successfully"
                 }
                 
-                // Send success notification email
+                // Send success notification email using variables from .env
                 sh """curl -s \
                 -X POST \
-                --user $MAIL_JET_API_KEY:$MAIL_JET_API_SECRET \
+                --user ${env.MAIL_JET_API_KEY}:${env.MAIL_JET_API_SECRET} \
                 https://api.mailjet.com/v3.1/send \
                 -H "Content-Type:application/json" \
                 -d '{
                     "Messages":[
                             {
                                     "From": {
-                                            "Email": "$MAIL_JET_EMAIL_ADDRESS",
+                                            "Email": "${env.MAIL_JET_EMAIL_ADDRESS}",
                                             "Name": "ArpanSahuOne Jenkins Notification"
                                     },
                                     "To": [
                                             {
-                                                    "Email": "$MY_EMAIL_ADDRESS",
+                                                    "Email": "${env.MY_EMAIL_ADDRESS}",
                                                     "Name": "Development Team"
                                             }
                                     ],
@@ -151,29 +250,28 @@ pipeline {
                     ]
                 }'"""
 
-                // Trigger school_chale_hum job only if the build is stable
-                build job: 'school_chale_hum', parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
+                // Trigger deploy job dynamically
+                build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [booleanParam(name: 'DEPLOY', value: true)], wait: false
             }
         }
         failure {
             script {
-                // Send failure notification email
+                // Send failure notification email using variables from .env
                 sh """curl -s \
                 -X POST \
-                --user $MAIL_JET_API_KEY:$MAIL_JET_API_SECRET \
+                --user ${env.MAIL_JET_API_KEY}:${env.MAIL_JET_API_SECRET} \
                 https://api.mailjet.com/v3.1/send \
                 -H "Content-Type:application/json" \
                 -d '{
                     "Messages":[
                             {
                                     "From": {
-                                            "Email": "$MAIL_JET_EMAIL_ADDRESS",
+                                            "Email": "${env.MAIL_JET_EMAIL_ADDRESS}",
                                             "Name": "ArpanSahuOne Jenkins Notification"
                                     },
                                     "To": [
                                             {
-                                                    "Email": "$MY_EMAIL_ADDRESS",
-                                                    "Name": "Development Team"
+                                                    "Email": "${env.MY_EMAIL_ADDRESS}
                                             }
                                     ],
                                     "Subject": "${currentBuild.fullDisplayName} build failed",

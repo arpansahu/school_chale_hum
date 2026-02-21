@@ -27,3 +27,16 @@ sqlparse==0.4.2
 urllib3==1.26.9
 whitenoise==6.1.0
 xlrd==2.0.1
+
+# Testing dependencies
+pytest==8.4.2
+pytest-django==4.11.1
+pytest-playwright==0.7.1
+pytest-base-url==2.1.0
+pytest-cov==7.0.0
+pytest-mock==3.15.1
+django-test-enforcer==0.1.0
+
+# Utilities
+rich==14.3.2
+toml==0.10.2

@@ -46,18 +46,28 @@
                       {% csrf_token %}
                     {{ form.as_p }}
                 </div>
-                <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                    <p class="mb-4 text-sm mx-auto">
-                      Want to Create a School?
-                      <a href="{% url 'school-create' %}" class="text-info text-gradient font-weight-bold">Click here..</a>
-                    </p>
+                <div class="row mt-3">
+                  <div class="col-md-6">
+                    <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                      <p class="mb-2 text-sm mx-auto">
+                        <i class="fas fa-school text-success me-1"></i> Want to Create a School?
+                      </p>
+                      <button type="button" class="btn btn-sm bg-gradient-success" data-bs-toggle="modal" data-bs-target="#schoolModal">
+                        <i class="fas fa-plus me-1"></i>Add School
+                      </button>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                      <p class="mb-2 text-sm mx-auto">
+                        <i class="fas fa-book text-info me-1"></i> Want to Create a Book?
+                      </p>
+                      <button type="button" class="btn btn-sm bg-gradient-info" data-bs-toggle="modal" data-bs-target="#bookModal">
+                        <i class="fas fa-plus me-1"></i>Add Book
+                      </button>
+                    </div>
+                  </div>
                 </div>
-                 <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                    <p class="mb-4 text-sm mx-auto">
-                      Want to Create a Book?
-                      <a href="{% url 'book-create' %}" class="text-info text-gradient font-weight-bold">Click here..</a>
-                    </p>
-                 </div>
                  <div class="card-footer text-center pt-0 px-lg-2 px-1">
                     <input type="submit" value="Create"  class="btn bg-gradient-success " />
                  </div>
@@ -68,6 +78,70 @@
     </div>
 </div>
 
+<!-- School Modal -->
+<div class="modal fade" id="schoolModal" tabindex="-1" aria-labelledby="schoolModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-gradient-success">
+        <h5 class="modal-title text-white" id="schoolModalLabel"><i class="fas fa-school me-2"></i>Add New School</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="schoolForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="school_name" class="form-label text-dark font-weight-bold">School Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control border px-3" id="school_name" name="name" placeholder="Enter school name" required>
+          </div>
+          <div class="mb-3">
+            <label for="school_country_code" class="form-label text-dark font-weight-bold">Country Code</label>
+            <input type="text" class="form-control border px-3" id="school_country_code" name="country_code" placeholder="+1" maxlength="5">
+          </div>
+          <div class="mb-3">
+            <label for="school_phone" class="form-label text-dark font-weight-bold">Phone Number</label>
+            <input type="text" class="form-control border px-3" id="school_phone" name="phone_number" placeholder="Enter phone number">
+          </div>
+          <div id="schoolErrors" class="alert alert-danger d-none mb-0"></div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancel</button>
+        <button type="button" class="btn bg-gradient-success" id="saveSchool"><i class="fas fa-save me-2"></i>Save School</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Book Modal -->
+<div class="modal fade" id="bookModal" tabindex="-1" aria-labelledby="bookModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-gradient-info">
+        <h5 class="modal-title text-white" id="bookModalLabel"><i class="fas fa-book me-2"></i>Add New Book</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <form id="bookForm">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label for="book_name" class="form-label text-dark font-weight-bold">Book Name <span class="text-danger">*</span></label>
+            <input type="text" class="form-control border px-3" id="book_name" name="name" placeholder="Enter book name" required>
+          </div>
+          <div class="mb-3">
+            <label for="book_pages" class="form-label text-dark font-weight-bold">Pages</label>
+            <input type="number" class="form-control border px-3" id="book_pages" name="pages" placeholder="Enter number of pages" min="1">
+          </div>
+          <div id="bookErrors" class="alert alert-danger d-none mb-0"></div>
+        </form>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn bg-gradient-secondary" data-bs-dismiss="modal"><i class="fas fa-times me-2"></i>Cancel</button>
+        <button type="button" class="btn bg-gradient-info" id="saveBook"><i class="fas fa-save me-2"></i>Save Book</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock content %}
 
 
@@ -75,6 +149,197 @@
 <!-- Specific JS goes HERE -->
 {% block javascripts %}
     <script>
+        // CSRF token setup for AJAX
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
 
+        // Save School via AJAX
+        document.getElementById('saveSchool').addEventListener('click', function() {
+            const form = document.getElementById('schoolForm');
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById('schoolErrors');
+            const saveBtn = this;
+            
+            // Disable button and show loading
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+            
+            fetch('{% url "ajax-school-create" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Response status:', response.status, response.statusText);
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        // Non-JSON response (like 403 HTML page)
+                        throw new Error('Server returned ' + response.status + ' ' + response.statusText + '. You may not be logged in or have permission.');
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data); // Debug logging
+                if (data.status === 'success') {
+                    // Add new school to dropdown
+                    const schoolSelect = document.querySelector('select[name="school"]');
+                    const option = new Option(data.school_name, data.school_id, true, true);
+                    schoolSelect.add(option);
+                    
+                    // Close modal and reset form
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('schoolModal'));
+                    modal.hide();
+                    form.reset();
+                    errorDiv.classList.add('d-none');
+                    
+                    // Show success toast notification
+                    showNotification('success', 'School created successfully!');
+                } else {
+                    // Show errors
+                    let errorMsg = '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-2">';
+                    if (data.errors) {
+                        for (let field in data.errors) {
+                            data.errors[field].forEach(err => {
+                                errorMsg += '<li>' + field + ': ' + err + '</li>';
+                            });
+                        }
+                    } else if (data.message) {
+                        errorMsg += '<li>' + data.message + '</li>';
+                    } else {
+                        errorMsg += '<li>An unknown error occurred.</li>';
+                    }
+                    errorMsg += '</ul>';
+                    errorDiv.innerHTML = errorMsg;
+                    errorDiv.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Full error:', error);
+                errorDiv.innerHTML = '<strong>Error:</strong> ' + error.message + '. Please check the browser console for details.';
+                errorDiv.classList.remove('d-none');
+            })
+            .finally(() => {
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save School';
+            });
+        });
+
+        // Save Book via AJAX
+        document.getElementById('saveBook').addEventListener('click', function() {
+            const form = document.getElementById('bookForm');
+            const formData = new FormData(form);
+            const errorDiv = document.getElementById('bookErrors');
+            const saveBtn = this;
+            
+            // Disable button and show loading
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+            
+            fetch('{% url "ajax-book-create" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Response status:', response.status, response.statusText);
+                    // Check if response is JSON
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        // Non-JSON response (like 403 HTML page)
+                        throw new Error('Server returned ' + response.status + ' ' + response.statusText + '. You may not be logged in or have permission.');
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data); // Debug logging
+                if (data.status === 'success') {
+                    // Add new book to checkboxes
+                    const bookContainer = document.querySelector('ul#id_book');
+                    const li = document.createElement('li');
+                    li.innerHTML = '<label for="id_book_' + data.book_id + '"><input type="checkbox" name="book" value="' + data.book_id + '" id="id_book_' + data.book_id + '" checked> ' + data.book_name + '</label>';
+                    bookContainer.appendChild(li);
+                    
+                    // Close modal and reset form
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('bookModal'));
+                    modal.hide();
+                    form.reset();
+                    errorDiv.classList.add('d-none');
+                    
+                    // Show success toast notification
+                    showNotification('success', 'Book created successfully!');
+                } else {
+                    // Show errors
+                    let errorMsg = '<strong>Please fix the following errors:</strong><ul class="mb-0 mt-2">';
+                    if (data.errors) {
+                        for (let field in data.errors) {
+                            data.errors[field].forEach(err => {
+                                errorMsg += '<li>' + field + ': ' + err + '</li>';
+                            });
+                        }
+                    } else if (data.message) {
+                        errorMsg += '<li>' + data.message + '</li>';
+                    } else {
+                        errorMsg += '<li>An unknown error occurred.</li>';
+                    }
+                    errorMsg += '</ul>';
+                    errorDiv.innerHTML = errorMsg;
+                    errorDiv.classList.remove('d-none');
+                }
+            })
+            .catch(error => {
+                console.error('Full error:', error);
+                errorDiv.innerHTML = '<strong>Error:</strong> ' + error.message + '. Please check the browser console for details.';
+                errorDiv.classList.remove('d-none');
+            })
+            .finally(() => {
+                // Re-enable button
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Book';
+            });
+        });
+        
+        // Success notification helper
+        function showNotification(type, message) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const iconClass = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+            
+            const notification = document.createElement('div');
+            notification.className = 'alert ' + alertClass + ' alert-dismissible fade show position-fixed top-0 end-0 m-3';
+            notification.style.zIndex = '9999';
+            notification.innerHTML = '<i class="fas ' + iconClass + ' me-2"></i>' + message + '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(function() {
+                notification.remove();
+            }, 3000);
+        }
     </script>
 {% endblock javascripts %}

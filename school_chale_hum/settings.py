@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import subprocess
 from decouple import config
 import dj_database_url
 import sentry_sdk
@@ -141,6 +142,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
+# CRITICAL: STATIC_ROOT must be defined regardless of DEBUG/USE_S3
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 if not DEBUG:
     if BUCKET_TYPE == 'AWS':
@@ -225,8 +228,6 @@ else:
     # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
     STATIC_URL = '/static/'
-
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -260,10 +261,17 @@ CACHES = {
 
 # Get the current git commit hash
 def get_git_commit_hash():
+    """Get git commit hash, suppressing errors when .git directory is not available (e.g., in Docker)."""
     try:
-        return subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+        return subprocess.check_output(
+            ['git', 'rev-parse', 'HEAD'],
+            stderr=subprocess.DEVNULL  # Suppress error messages in Docker
+        ).decode('utf-8').strip()
     except Exception:
         return None
+
+# Adjust sampling based on environment
+traces_sample_rate = 0.1 if SENTRY_ENVIRONMENT == 'production' else 1.0
 
 sentry_sdk.init(
     dsn=SENTRY_DSH_URL,
@@ -271,19 +279,12 @@ sentry_sdk.init(
             DjangoIntegration(
                 transaction_style='url',
                 middleware_spans=True,
-                # signals_spans=True,
-                # signals_denylist=[
-                #     django.db.models.signals.pre_init,
-                #     django.db.models.signals.post_init,
-                # ],
-                # cache_spans=False,
             ),
         ],
-    traces_sample_rate=1.0,  # Adjust this according to your needs
+    traces_sample_rate=traces_sample_rate,
     send_default_pii=True,  # To capture personal identifiable information (optional)
     release=get_git_commit_hash(),  # Set the release to the current git commit hash
     environment=SENTRY_ENVIRONMENT,  # Or "staging", "development", etc.
-    # profiles_sample_rate=1.0,
 )
 
 LOGGING = {

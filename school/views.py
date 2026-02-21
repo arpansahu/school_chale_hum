@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.decorators.http import require_http_methods
 
 from .forms import StudentForm, BookForm, SchoolForm
 from .models import (
@@ -151,3 +152,53 @@ class BookCreateView(CreateView):
 
     def get_success_url(self):
         return reverse('book', kwargs={'pk': self.object.id})
+
+
+@login_required
+@require_http_methods(["POST"])
+def ajax_create_school(request):
+    """AJAX endpoint to create a school without page refresh"""
+    try:
+        form = SchoolForm(request.POST)
+        if form.is_valid():
+            school = form.save()
+            return JsonResponse({
+                'status': 'success',
+                'school_id': school.id,
+                'school_name': school.name
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'errors': form.errors
+            }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def ajax_create_book(request):
+    """AJAX endpoint to create a book without page refresh"""
+    try:
+        form = BookForm(request.POST)
+        if form.is_valid():
+            book = form.save()
+            return JsonResponse({
+                'status': 'success',
+                'book_id': book.id,
+                'book_name': book.name
+            })
+        else:
+            return JsonResponse({
+                'status': 'error',
+                'errors': form.errors
+            }, status=400)
+    except Exception as e:
+        return JsonResponse({
+            'status': 'error',
+            'message': str(e)
+        }, status=500)

@@ -14,7 +14,7 @@ from account.views import (
     RegistrationView,
     activate,
 )
-from school.views import(
+from school.views import (
     HomeView,
     StudentView,
     search_id,
@@ -24,7 +24,9 @@ from school.views import(
     SchoolCreateView,
     BookCreateView,
     SchoolView,
-    BookView
+    BookView,
+    ajax_create_school,
+    ajax_create_book,
 )
 
 def trigger_error(request):
@@ -46,6 +48,10 @@ urlpatterns = [
     path('school/<pk>/', SchoolView.as_view(), name='school'),
     path('book/add/', BookCreateView.as_view(), name='book-create'),
     path('book/<pk>/', BookView.as_view(), name='book'),
+
+    # AJAX endpoints for inline creation
+    path('ajax/school/add/', ajax_create_school, name='ajax-school-create'),
+    path('ajax/book/add/', ajax_create_book, name='ajax-book-create'),
 
     # autocomplete views
     path('search-student-id/', search_id, name='search-company-id'),
