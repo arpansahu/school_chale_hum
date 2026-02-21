@@ -151,6 +151,9 @@ USE_TZ = True
 # CRITICAL: STATIC_ROOT must be defined regardless of DEBUG/USE_S3
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Read USE_S3 setting from environment
+USE_S3 = config('USE_S3', default=False, cast=bool)
+
 if not DEBUG:
     if BUCKET_TYPE == 'AWS':
         AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'

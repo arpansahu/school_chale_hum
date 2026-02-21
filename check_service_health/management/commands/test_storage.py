@@ -19,7 +19,7 @@ class Command(BaseCommand):
                 self.stdout.write('To test MinIO storage, set USE_S3=True in your .env file')
                 return
             
-            self.stdout.write(f'Storage Backend: {settings.STORAGES["default"]["BACKEND"]}')
+            # Django 4.0.4 compatible - use settings directly
             self.stdout.write(f'Bucket Type: {settings.BUCKET_TYPE}')
             self.stdout.write(f'Bucket Name: {settings.AWS_STORAGE_BUCKET_NAME}')
             self.stdout.write(f'Endpoint URL: {settings.AWS_S3_ENDPOINT_URL}')
