@@ -98,7 +98,8 @@ pipeline {
                     expression { return BUILD_STATUS != 'NOT_BUILT' }
                     expression { return !params.SKIP_TESTS }
                 }
-            }echo "Environment already loaded from Jenkins credentials
+            }
+            steps {
                 script {
                     echo "Running unit tests..."
                     sh """
