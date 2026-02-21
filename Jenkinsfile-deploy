@@ -3,7 +3,6 @@ pipeline {
     parameters {
         booleanParam(name: 'DEPLOY', defaultValue: true, description: 'Enable deployment')
         choice(name: 'DEPLOY_TYPE', choices: ['kubernetes', 'docker'], description: 'Select deployment type')
-        string(name: 'IMAGE_TAG', defaultValue: 'latest', description: 'Docker image tag to deploy')
     }
     environment {
         KUBECONFIG = "${env.WORKSPACE}/kubeconfig"  // Set the KUBECONFIG environment variable
@@ -92,28 +91,69 @@ pipeline {
                 }
             }
         }
-        stage('Prepare Deployment Config') {
+        stage('Retrieve Image Tag from Build Job') {
             when {
-                expression { params.DEPLOY}
+                expression { params.DEPLOY }
             }
             steps {
                 script {
-                    echo "Using image tag from build job: ${params.IMAGE_TAG}"
+                    withCredentials([usernamePassword(
+                        credentialsId: 'jenkins-admin-credentials',
+                        usernameVariable: 'JENKINS_USER',
+                        passwordVariable: 'JENKINS_TOKEN'
+                    )]) {
+                        // Query Jenkins API to get the last successful build number
+                        def buildJobName = "${env.ENV_PROJECT_NAME}_build"
+                        def jenkinsUrl = "https://jenkins.arpansahu.space"
+                        def apiUrl = "${jenkinsUrl}/job/${buildJobName}/lastSuccessfulBuild/api/json"
+                        
+                        echo "Querying Jenkins API: ${apiUrl}"
+                        
+                        def buildInfoJson = sh(
+                            script: "curl -s -u ${JENKINS_USER}:${JENKINS_TOKEN} '${apiUrl}'",
+                            returnStdout: true
+                        ).trim()
+                        
+                        echo "Build info: ${buildInfoJson}"
+                        
+                        // Extract the build number (id) from the JSON response
+                        def imageTag = sh(
+                            script: """echo '${buildInfoJson}' | grep -o '"id":"[0-9]*"' | head -1 | tr -dc '0-9'""",
+                            returnStdout: true
+                        ).trim()
+                        
+                        if (!imageTag) {
+                            error "Failed to retrieve image tag from build job. Build info: ${buildInfoJson}"
+                        }
+                        
+                        echo "Retrieved image tag: ${imageTag}"
+                        env.IMAGE_TAG = imageTag
+                    }
+                }
+            }
+        }
+        stage('Prepare Deployment Config') {
+            when {
+                expression { params.DEPLOY }
+            }
+            steps {
+                script {
+                    echo "Using image tag from build job: ${env.IMAGE_TAG}"
 
                     // Check if REGISTRY, REPOSITORY, and IMAGE_TAG are all defined and not empty
-                    if (env.REGISTRY && env.REPOSITORY && params.IMAGE_TAG) {
+                    if (env.REGISTRY && env.REPOSITORY && env.IMAGE_TAG) {
                         if (params.DEPLOY_TYPE == 'kubernetes') {
                             // Replace the placeholder in the deployment YAML
-                            sh "sed -i 's|:latest|:${params.IMAGE_TAG}|g' ${WORKSPACE}/deployment.yaml"
-                            echo "Updated deployment.yaml with image tag: ${params.IMAGE_TAG}"
+                            sh "sed -i 's|:latest|:${env.IMAGE_TAG}|g' ${WORKSPACE}/deployment.yaml"
+                            echo "Updated deployment.yaml with image tag: ${env.IMAGE_TAG}"
                         }   
                         
                         if (params.DEPLOY_TYPE == 'docker') {
                             // Ensure the correct image tag is used in the docker-compose.yml
                             sh """
-                            sed -i 's|image: .*|image: ${env.REGISTRY}/${env.REPOSITORY}:${params.IMAGE_TAG}|' docker-compose.yml
+                            sed -i 's|image: .*|image: ${env.REGISTRY}/${env.REPOSITORY}:${env.IMAGE_TAG}|' docker-compose.yml
                             """
-                            echo "Updated docker-compose.yml with image tag: ${params.IMAGE_TAG}"
+                            echo "Updated docker-compose.yml with image tag: ${env.IMAGE_TAG}"
                         }
                     } else {
                         error "Required variables (REGISTRY, REPOSITORY, IMAGE_TAG) are missing. Cannot proceed with deployment."

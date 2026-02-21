@@ -264,11 +264,10 @@ pipeline {
                         ]
                     }'"""
 
-                    // Trigger deploy job dynamically with IMAGE_TAG parameter
-                    echo "Triggering deployment with IMAGE_TAG: ${env.IMAGE_TAG}"
+                    // Trigger deploy job
+                    echo "Triggering deployment for build: ${env.BUILD_ID}"
                     build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [
-                        booleanParam(name: 'DEPLOY', value: true),
-                        string(name: 'IMAGE_TAG', value: env.IMAGE_TAG)
+                        booleanParam(name: 'DEPLOY', value: true)
                     ], wait: false
                 } else {
                     echo "Build was skipped (no changes). Not triggering deployment."
