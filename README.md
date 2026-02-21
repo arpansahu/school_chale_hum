@@ -2145,7 +2145,13 @@ COPY . .
 
 EXPOSE 8013
 
-CMD bash -c "python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
+CMD bash -c "python manage.py migrate --noinput && \
+    if [ \"$USE_S3\" = \"False\" ] || [ \"$USE_S3\" = \"false\" ]; then \
+        python manage.py collectstatic --noinput; \
+    else \
+        echo 'Skipping collectstatic (USE_S3=True - static files served from S3/MinIO)'; \
+    fi && \
+    gunicorn --bind 0.0.0.0:8013 school_chale_hum.wsgi"
 ```
 
 Create a file named docker-compose.yml and add following lines in it
