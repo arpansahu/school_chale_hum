@@ -263,9 +263,10 @@ pipeline {
                 }'"""
 
                 // Trigger deploy job dynamically with IMAGE_TAG parameter
+                echo "Triggering deployment with IMAGE_TAG: ${env.IMAGE_TAG}"
                 build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [
                     booleanParam(name: 'DEPLOY', value: true),
-                    string(name: 'IMAGE_TAG', value: "${IMAGE_TAG}")
+                    string(name: 'IMAGE_TAG', value: env.IMAGE_TAG)
                 ], wait: false
             }
         }

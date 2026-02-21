@@ -171,13 +171,9 @@ pipeline {
                             // Print current directory
                             sh 'pwd'
                             
-                            // Delete existing secret if it exists
+                            // Create or update secret (delete + recreate to avoid conflicts)
                             sh """
-                            kubectl delete secret ${env.PROJECT_NAME_WITH_DASH}-secret || true
-                            """
-
-                            // Deploy to Kubernetes
-                            sh """
+                            kubectl delete secret ${env.PROJECT_NAME_WITH_DASH}-secret --ignore-not-found=true
                             kubectl create secret generic ${env.PROJECT_NAME_WITH_DASH}-secret --from-env-file=${WORKSPACE}/.env
                             kubectl apply -f ${WORKSPACE}/service.yaml
                             kubectl apply -f ${WORKSPACE}/deployment.yaml
