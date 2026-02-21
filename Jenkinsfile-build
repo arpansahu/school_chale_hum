@@ -232,42 +232,47 @@ pipeline {
     post {
         success {
             script {
-                if (!currentBuild.description) {
-                    currentBuild.description = "Image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG} built and pushed successfully"
-                }
-                
-                // Send success notification email using variables from .env
-                sh """curl -s \
-                -X POST \
-                --user ${env.MAIL_JET_API_KEY}:${env.MAIL_JET_API_SECRET} \
-                https://api.mailjet.com/v3.1/send \
-                -H "Content-Type:application/json" \
-                -d '{
-                    "Messages":[
-                            {
-                                    "From": {
-                                            "Email": "${env.MAIL_JET_EMAIL_ADDRESS}",
-                                            "Name": "ArpanSahuOne Jenkins Notification"
-                                    },
-                                    "To": [
-                                            {
-                                                    "Email": "${env.MY_EMAIL_ADDRESS}",
-                                                    "Name": "Development Team"
-                                            }
-                                    ],
-                                    "Subject": "${currentBuild.description}",
-                                    "TextPart": "Hola Development Team, your project ${currentBuild.fullDisplayName} : ${currentBuild.description}",
-                                    "HTMLPart": "<h3>Hola Development Team, your project ${currentBuild.fullDisplayName} : ${currentBuild.description} </h3> <br> <p> Build Url: ${env.BUILD_URL}  </p>"
-                            }
-                    ]
-                }'"""
+                // Only trigger deployment if we actually built something
+                if (BUILD_STATUS == 'BUILT') {
+                    if (!currentBuild.description) {
+                        currentBuild.description = "Image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG} built and pushed successfully"
+                    }
+                    
+                    // Send success notification email using variables from .env
+                    sh """curl -s \
+                    -X POST \
+                    --user ${env.MAIL_JET_API_KEY}:${env.MAIL_JET_API_SECRET} \
+                    https://api.mailjet.com/v3.1/send \
+                    -H "Content-Type:application/json" \
+                    -d '{
+                        "Messages":[
+                                {
+                                        "From": {
+                                                "Email": "${env.MAIL_JET_EMAIL_ADDRESS}",
+                                                "Name": "ArpanSahuOne Jenkins Notification"
+                                        },
+                                        "To": [
+                                                {
+                                                        "Email": "${env.MY_EMAIL_ADDRESS}",
+                                                        "Name": "Development Team"
+                                                }
+                                        ],
+                                        "Subject": "${currentBuild.description}",
+                                        "TextPart": "Hola Development Team, your project ${currentBuild.fullDisplayName} : ${currentBuild.description}",
+                                        "HTMLPart": "<h3>Hola Development Team, your project ${currentBuild.fullDisplayName} : ${currentBuild.description} </h3> <br> <p> Build Url: ${env.BUILD_URL}  </p>"
+                                }
+                        ]
+                    }'"""
 
-                // Trigger deploy job dynamically with IMAGE_TAG parameter
-                echo "Triggering deployment with IMAGE_TAG: ${env.IMAGE_TAG}"
-                build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [
-                    booleanParam(name: 'DEPLOY', value: true),
-                    string(name: 'IMAGE_TAG', value: env.IMAGE_TAG)
-                ], wait: false
+                    // Trigger deploy job dynamically with IMAGE_TAG parameter
+                    echo "Triggering deployment with IMAGE_TAG: ${env.IMAGE_TAG}"
+                    build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [
+                        booleanParam(name: 'DEPLOY', value: true),
+                        string(name: 'IMAGE_TAG', value: env.IMAGE_TAG)
+                    ], wait: false
+                } else {
+                    echo "Build was skipped (no changes). Not triggering deployment."
+                }
             }
         }
         failure {
