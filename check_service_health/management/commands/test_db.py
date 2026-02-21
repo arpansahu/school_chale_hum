@@ -10,25 +10,25 @@ class Command(BaseCommand):
         try:
             # Create a test entry
             test_entry = TestModel.objects.create(name='Test Entry')
-            self.stdout.write(self.style.SUCCESS(f'Successfully created test entry: {test_entry}'))
+            self.stdout.write(self.style.SUCCESS(f'✓ Successfully created test entry: {test_entry}'))
 
             # Read the test entry
             retrieved_entry = TestModel.objects.get(name='Test Entry')
-            self.stdout.write(self.style.SUCCESS(f'Successfully retrieved test entry: {retrieved_entry}'))
+            self.stdout.write(self.style.SUCCESS(f'✓ Successfully retrieved test entry: {retrieved_entry}'))
 
             # Update the test entry
             retrieved_entry.name = 'Updated Test Entry'
             retrieved_entry.save()
-            self.stdout.write(self.style.SUCCESS(f'Successfully updated test entry: {retrieved_entry}'))
+            self.stdout.write(self.style.SUCCESS(f'✓ Successfully updated test entry: {retrieved_entry}'))
 
             # Delete the test entry
             retrieved_entry.delete()
-            self.stdout.write(self.style.SUCCESS('Successfully deleted test entry'))
+            self.stdout.write(self.style.SUCCESS('✓ Successfully deleted test entry'))
 
             # Confirm deletion
             if not TestModel.objects.filter(name='Updated Test Entry').exists():
-                self.stdout.write(self.style.SUCCESS('Database test completed successfully'))
+                self.stdout.write(self.style.SUCCESS('✅ Database test completed successfully'))
             else:
-                self.stdout.write(self.style.ERROR('Test entry was not deleted'))
+                self.stdout.write(self.style.ERROR('❌ Test entry was not deleted'))
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f'Error occurred: {e}'))
+            self.stdout.write(self.style.ERROR(f'❌ Error occurred: {e}'))

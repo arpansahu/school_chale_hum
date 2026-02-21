@@ -59,6 +59,9 @@ INSTALLED_APPS = [
     'account',
     'school',
     'check_service_health',
+    
+    # Testing
+    'django_test_enforcer',
 ]
 
 MIDDLEWARE = [

@@ -35,4 +35,10 @@ def authenticated_client(db, test_user):
 @pytest.fixture
 def server_url():
     """Base URL for UI tests."""
-    return 'http://127.0.0.1:8000'
+    return 'http://127.0.0.1:8013'
+
+
+@pytest.fixture
+def base_url():
+    """Base URL for Playwright UI tests."""
+    return 'http://127.0.0.1:8013'

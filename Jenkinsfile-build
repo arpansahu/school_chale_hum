@@ -104,13 +104,20 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Running unit tests..."
+                    echo 'Running Django Unit Tests with django-test-enforcer...'
+                    
+                    // Run unit tests using Django test command with test settings
                     sh """
-                    docker run --rm -v \$(pwd):/app -w /app --env-file .env python:3.10.7 \\
+                    docker run --rm \\
+                        -v \$(pwd):/app \\
+                        -w /app \\
+                        --env-file .env \\
+                        python:3.10.7 \\
                         bash -c 'pip install -q -r requirements.txt && \\
-                                 pip install -q pytest pytest-django pytest-cov pytest-mock && \\
-                                 python -m pytest -m "not ui and not todo" --ignore=tests -v || true'
+                                 python manage.py test --settings=school_chale_hum.test_settings --verbosity=2 --failfast'
                     """
+                    
+                    echo '✅ All unit tests passed successfully!'
                 }
             }
         }
@@ -131,31 +138,56 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Running UI tests with Playwright..."
-                    sh """
-                    docker run --rm -v \$(pwd):/app -w /app --env-file .env \\
-                        mcr.microsoft.com/playwright/python:v1.40.0-jammy bash -c '
-                            pip install -q -r requirements.txt
-                            playwright install chromium
-                            python manage.py migrate --settings=school_chale_hum.test_settings
-                            python manage.py runserver 0.0.0.0:8000 --settings=school_chale_hum.test_settings &
-                            SERVER_PID=\\\$!
-                            
-                            # Wait for server to start
-                            for i in {1..30}; do
-                                if curl -s http://127.0.0.1:8000/ > /dev/null 2>&1; then
-                                    echo "Server started successfully"
-                                    break
-                                fi
-                                sleep 1
-                            done
-                            
-                            pytest **/test_ui.py -m "ui and not todo" -v --tb=short -x || true
-                            TEST_RESULT=\\\$?
-                            kill \\\$SERVER_PID 2>/dev/null || true
-                            exit \\\$TEST_RESULT
-                        ' || true
-                    """
+                    echo 'Running Playwright UI Tests with embedded Django server...'
+                    
+                    // Run UI tests with Playwright - starts Django server internally
+                    def uiTestResult = sh(
+                        script: """
+                        docker run --rm \\
+                            -v \$(pwd):/app \\
+                            -w /app \\
+                            --env-file .env \\
+                            mcr.microsoft.com/playwright/python:v1.40.0-jammy \\
+                            bash -c '
+                                set -e
+                                pip install -q -r requirements.txt
+                                pip install -q pytest pytest-django pytest-playwright
+                                playwright install chromium
+                                
+                                # Start Django server in background
+                                python manage.py runserver 0.0.0.0:8013 &
+                                SERVER_PID=\\\$!
+                                
+                                # Wait for server to be ready
+                                echo "Waiting for Django server to start..."
+                                for i in {1..30}; do
+                                    if curl -s http://127.0.0.1:8013/ > /dev/null 2>&1; then
+                                        echo "Django server is ready!"
+                                        break
+                                    fi
+                                    sleep 1
+                                done
+                                
+                                # Run UI tests
+                                pytest **/test_ui.py -v --tb=short -x || TEST_EXIT_CODE=\\\$?
+                                
+                                # Stop Django server
+                                kill \\\$SERVER_PID 2>/dev/null || true
+                                
+                                exit \\${TEST_EXIT_CODE:-0}
+                            '
+                        """,
+                        returnStatus: true
+                    )
+                    
+                    if (uiTestResult == 0) {
+                        echo '✅ All UI tests passed successfully!'
+                    } else if (uiTestResult == 125) {
+                        echo '⚠️ UI tests skipped - Docker image pull failed (network issue)'
+                        // Don\'t fail the build for network issues pulling the Playwright image
+                    } else {
+                        error "UI tests failed with exit code: ${uiTestResult}"
+                    }
                 }
             }
         }
