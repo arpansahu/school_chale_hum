@@ -65,29 +65,25 @@ pipeline {
                 }
             }
         }
-        stage('Check & Create Nginx Configuration') {
+        stage('Update Nginx Configuration') {
             steps {
                 script {
-                    // Check if the Nginx configuration file exists
-                    def configExists = sh(script: "test -f ${NGINX_CONF} && echo 'exists' || echo 'not exists'", returnStdout: true).trim()
+                    echo "Updating Nginx configuration from repository..."
 
-                    if (configExists == 'not exists') {
-                        echo "Nginx configuration file does not exist. Creating it now..."
+                    // Always update the config to ensure it matches the repository version
+                    sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF} > /dev/null"
 
-                        // Create or overwrite the NGINX_CONF file with the content of nginx.conf using sudo tee
-                        sh "sudo cat nginx.conf | sudo tee ${NGINX_CONF} > /dev/null"
+                    // Replace placeholders in the configuration file
+                    sh "sudo sed -i 's|SERVER_NAME|${SERVER_NAME}|g' ${NGINX_CONF}"
+                    sh "sudo sed -i 's|DOCKER_PORT|${DOCKER_PORT}|g' ${NGINX_CONF}"
 
-                        // Replace placeholders in the configuration file
-                        sh "sudo sed -i 's|SERVER_NAME|${SERVER_NAME}|g' ${NGINX_CONF}"
-                        sh "sudo sed -i 's|DOCKER_PORT|${DOCKER_PORT}|g' ${NGINX_CONF}"
+                    echo "✅ Nginx configuration updated successfully"
 
-                        echo "Nginx configuration file created."
-
-                        // Ensure Nginx is aware of the new configuration
-                        sh "sudo ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/"
-                    } else {
-                        echo "Nginx configuration file already exists."
-                    }                    
+                    // Ensure Nginx is aware of the configuration
+                    sh "sudo ln -sf ${NGINX_CONF} /etc/nginx/sites-enabled/"
+                    
+                    // Test nginx configuration
+                    sh "sudo nginx -t"
                 }
             }
         }
