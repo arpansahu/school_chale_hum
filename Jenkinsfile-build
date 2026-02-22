@@ -1,13 +1,14 @@
 pipeline {
     agent any
     parameters {
-        booleanParam(name: 'skip_checks', defaultValue: false, description: 'Skip the Check for Changes stage')
-        booleanParam(name: 'SKIP_TESTS', defaultValue: false, description: 'Skip test execution')
+        booleanParam(
+            name: 'RUN_TESTS',
+            defaultValue: true,
+            description: 'Run tests before building. Set to false for faster builds.'
+        )
     }
     environment {
         IMAGE_TAG = "${env.BUILD_ID}"
-        COMMIT_FILE = "${env.WORKSPACE}/last_commit.txt"
-        BUILD_STATUS = 'NOT_BUILT'  // Initialize to prevent undefined errors
     }
     stages {
         stage('Checkout') {
@@ -46,61 +47,9 @@ pipeline {
                 }
             }
         }
-        stage('Check for Changes') {
-            steps {
-                script {
-                    if (params.skip_checks) {
-                        echo "Skipping Checks is True. Proceeding with build."
-                        BUILD_STATUS = 'BUILT'
-                        currentBuild.description = "${currentBuild.fullDisplayName} Skipping Checks is True. Proceeding with build."
-                    } else {
-                        // Get the current commit hash
-                        def currentCommit = sh(script: "git rev-parse HEAD", returnStdout: true).trim()
-                        echo "Current commit: ${currentCommit}"
-
-                        // Check if the last commit file exists
-                        if (fileExists(COMMIT_FILE)) {
-                            def lastCommit = readFile(COMMIT_FILE).trim()
-                            echo "Last commit: ${lastCommit}"
-
-                            // Compare the current commit with the last commit
-                            if (currentCommit == lastCommit) {
-                                echo "No changes detected. Skipping build."
-                                currentBuild.description = "${currentBuild.fullDisplayName} build skipped due to no changes detected"
-                                return
-                            } else {
-                                // Check for changes in relevant files
-                                def changes = sh(script: "git diff --name-only ${lastCommit} ${currentCommit}", returnStdout: true).trim().split("\n")
-                                def relevantChanges = changes.findAll { 
-                                    !(it in ['README.md', 'SECURITY.md', 'CHANGELOG.md', '.github/dependabot.yml'])
-                                }
-                                
-                                if (relevantChanges.isEmpty()) {
-                                    echo "No relevant changes detected. Skipping build."
-                                    currentBuild.description = "${currentBuild.fullDisplayName} build skipped due to no relevant changes"
-                                    return
-                                } else {
-                                    echo "Relevant changes detected. Proceeding with build."
-                                    BUILD_STATUS = 'BUILT'
-                                }
-                            }
-                        } else {
-                            echo "No last commit file found. Proceeding with initial build."
-                            BUILD_STATUS = 'BUILT'
-                        }
-
-                        // Save the current commit hash to the file
-                        writeFile(file: COMMIT_FILE, text: currentCommit)
-                    }
-                }
-            }
-        }
         stage('Run Unit Tests') {
             when {
-                allOf {
-                    expression { return BUILD_STATUS != 'NOT_BUILT' }
-                    expression { return !params.SKIP_TESTS }
-                }
+                expression { return params.RUN_TESTS }
             }
             steps {
                 script {
@@ -124,8 +73,7 @@ pipeline {
         stage('Run UI Tests') {
             when {
                 allOf {
-                    expression { return BUILD_STATUS != 'NOT_BUILT' }
-                    expression { return !params.SKIP_TESTS }
+                    expression { return params.RUN_TESTS }
                     expression { 
                         // Only run if test_ui.py files exist
                         def uiTestFiles = sh(
@@ -192,9 +140,6 @@ pipeline {
             }
         }
         stage('Dependencies') {
-            when {
-                expression { return BUILD_STATUS != 'NOT_BUILT' }
-            }
             steps {
                 script {
                     echo "Dependencies stage - .env already configured in Setup Environment"
@@ -204,9 +149,6 @@ pipeline {
             }
         }
         stage('Build Image') {
-            when {
-                expression { return BUILD_STATUS != 'NOT_BUILT' }
-            }
             steps {
                 script {
                     // Ensure Docker is running and can be accessed
@@ -224,9 +166,6 @@ pipeline {
             }
         }
         stage('Push Image') {
-            when {
-                expression { return BUILD_STATUS != 'NOT_BUILT' }
-            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'harbor-credentials', passwordVariable: 'DOCKER_REGISTRY_PASSWORD', usernameVariable: 'DOCKER_REGISTRY_USERNAME')]) {
                     script {
@@ -245,9 +184,6 @@ pipeline {
             }
         }
         stage('Sentry Release') {
-            when {
-                expression { return BUILD_STATUS != 'NOT_BUILT' }
-            }
             steps {
                 script {
                     withCredentials([string(credentialsId: 'sentry-auth-token', variable: 'SENTRY_AUTH_TOKEN')]) {
@@ -264,11 +200,9 @@ pipeline {
     post {
         success {
             script {
-                // Only trigger deployment if we actually built something
-                if (BUILD_STATUS == 'BUILT') {
-                    if (!currentBuild.description) {
-                        currentBuild.description = "Image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG} built and pushed successfully"
-                    }
+                if (!currentBuild.description) {
+                    currentBuild.description = "Image: ${REGISTRY}/${REPOSITORY}:${IMAGE_TAG} built and pushed successfully"
+                }
                     
                     // Send success notification email using variables from .env
                     sh """curl -s \
