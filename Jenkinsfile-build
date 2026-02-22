@@ -235,9 +235,6 @@ pipeline {
                     build job: "${env.ENV_PROJECT_NAME}_deploy", parameters: [
                         booleanParam(name: 'DEPLOY', value: true)
                     ], wait: false
-                } else {
-                    echo "Build was skipped (no changes). Not triggering deployment."
-                }
             }
         }
         failure {
