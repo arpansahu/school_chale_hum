@@ -4,8 +4,25 @@ Shared pytest fixtures and configuration for all tests.
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import Client
+from playwright.sync_api import Browser
 
 User = get_user_model()
+
+
+@pytest.fixture(scope="session")
+def context(browser: Browser):
+    context = browser.new_context()
+    yield context
+    context.close()
+
+
+@pytest.fixture
+def page(context):
+    page = context.new_page()
+    page.set_default_timeout(60000)
+    page.set_default_navigation_timeout(60000)
+    yield page
+    page.close()
 
 
 @pytest.fixture
